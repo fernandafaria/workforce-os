@@ -10,6 +10,7 @@ import logging
 from supabase import create_client, Client
 
 from ..config import get_settings
+from ..knowledge.embeddings import embed_query
 
 log = logging.getLogger(__name__)
 
@@ -62,33 +63,37 @@ class AgentCatalog:
         return self._client
     
     async def count(self) -> int:
-        """Total personas available."""
+        """Total canonical personas available."""
         try:
-            result = self.client.table("personas").select("slug", count="exact").execute()
-            return result.count or 150
-        except Exception:
-            return 150
+            result = self.client.table("personas").select(
+                "slug", count="exact"
+            ).eq("status", "canonical").execute()
+            return result.count or 0
+        except Exception as e:
+            log.warning(f"Persona count failed: {e}")
+            return 0
     
     async def list_all(self, team: Optional[str] = None, limit: int = 200) -> List[Dict[str, Any]]:
-        """List all personas, optionally filtered by team."""
+        """List all personas (status='canonical'), optionally filtered by team."""
         try:
             query = self.client.table("personas").select(
-                "slug, handle, name, home_team, domains, persona_md"
-            ).not_("persona_md", "is", "null")
-            
+                "slug, handle, name, home_team, domains, persona_md, role"
+            ).eq("status", "canonical")
+
             if team:
                 query = query.eq("home_team", team)
-            
+
             result = query.limit(limit).execute()
-            
+
             return [
                 {
                     "slug": r["slug"],
                     "handle": r["handle"],
                     "name": r["name"],
                     "home_team": r["home_team"],
-                    "domains": r.get("domains", []),
-                    "prompt_length": len(r.get("persona_md", "")),
+                    "role": r.get("role"),
+                    "domains": r.get("domains") or [],
+                    "prompt_length": len(r.get("persona_md") or ""),
                 }
                 for r in (result.data or [])
             ]
@@ -106,60 +111,75 @@ class AgentCatalog:
             return None
     
     async def match(self, query: str, top_k: int = 10) -> List[Dict[str, Any]]:
-        """Semantic match: pgvector similarity search + domain rules + LLM refine."""
-        matches = []
-        
-        # 1. Domain rule matching
+        """Hybrid match: pgvector semantic similarity (Voyage) + domain rules.
+
+        Calls the canonical `match_personas(query_embedding, match_threshold,
+        match_count, p_team_slug, p_user_id)` RPC in Supabase, which requires
+        a real Voyage embedding of the query and filters status='canonical'.
+        """
+        matches: List[Dict[str, Any]] = []
+
+        # 1. Deterministic domain rules — boost the agents we know belong here
         query_lower = query.lower()
-        matched_slugs = set()
+        matched_slugs: set = set()
         for domain, slugs in DOMAIN_AGENT_MAP.items():
             if domain in query_lower:
                 for s in slugs:
                     matched_slugs.add(s)
-        
-        # 2. pgvector semantic search
+
+        # 2. Embed query (Voyage) and call semantic RPC
         try:
-            result = self.client.rpc(
-                "match_personas",
-                {"query_text": query, "match_limit": top_k},
-            ).execute()
-            
-            if result.data:
-                for r in result.data:
+            query_embedding = await embed_query(query)
+            if query_embedding:
+                result = self.client.rpc(
+                    "match_personas",
+                    {
+                        "query_embedding": query_embedding,
+                        "match_threshold": 0.50,
+                        "match_count": top_k * 2,
+                    },
+                ).execute()
+
+                for r in (result.data or []):
                     matches.append({
                         "slug": r["slug"],
-                        "handle": r.get("handle", f"@{r['slug']}"),
-                        "name": r.get("name", r["slug"]),
-                        "home_team": r.get("home_team", ""),
-                        "score": r.get("similarity", 0.5),
+                        "handle": r.get("handle") or f"@{r['slug']}",
+                        "name": r.get("name") or r["slug"],
+                        "home_team": r.get("home_team") or "",
+                        "role": r.get("role"),
+                        "score": float(r.get("similarity") or 0.0),
                         "source": "semantic",
                     })
         except Exception as e:
-            log.warning(f"Semantic search failed: {e}")
-        
-        # 3. Boost domain-matched agents
+            log.warning(f"Semantic search via match_personas failed: {e}")
+
+        # 3. Boost domain-matched agents already present
         for m in matches:
             if m["slug"] in matched_slugs:
-                m["score"] = min(1.0, m["score"] + 0.2)
+                m["score"] = min(1.0, m["score"] + 0.20)
                 m["source"] = "semantic+domain"
-        
-        # 4. Add domain-matched agents not in semantic results
+
+        # 4. Inject domain-matched agents missing from semantic results
         for slug in matched_slugs:
-            if not any(m["slug"] == slug for m in matches):
-                try:
-                    result = self.client.table("personas").select("slug, handle, name, home_team").eq("slug", slug).single().execute()
-                    if result.data:
-                        matches.append({
-                            "slug": result.data["slug"],
-                            "handle": result.data.get("handle", f"@{slug}"),
-                            "name": result.data.get("name", slug),
-                            "home_team": result.data.get("home_team", ""),
-                            "score": 0.6,
-                            "source": "domain_rule",
-                        })
-                except Exception:
-                    pass
-        
+            if any(m["slug"] == slug for m in matches):
+                continue
+            try:
+                r = self.client.table("personas").select(
+                    "slug, handle, name, home_team, role"
+                ).eq("slug", slug).eq("status", "canonical").single().execute()
+                if r.data:
+                    matches.append({
+                        "slug": r.data["slug"],
+                        "handle": r.data.get("handle") or f"@{slug}",
+                        "name": r.data.get("name") or slug,
+                        "home_team": r.data.get("home_team") or "",
+                        "role": r.data.get("role"),
+                        "score": 0.65,
+                        "source": "domain_rule",
+                    })
+            except Exception:
+                continue
+
         matches.sort(key=lambda m: m["score"], reverse=True)
         return matches[:top_k]
     

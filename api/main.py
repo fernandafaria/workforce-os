@@ -79,17 +79,17 @@ async def council(req: CouncilRequest, user_id: str = Depends(get_user_id)):
     """Conselho 1:1 — CEO pergunta, sistema seleciona e orquestra especialistas."""
     from .orchestrator import CouncilOrchestrator
     from .formatter.hierarchical import HierarchicalFormatter
-    
+
     orch = CouncilOrchestrator()
-    result = await orch.execute(req.question, req.context, req.agents)
-    
+    result = await orch.execute(req.question, req.context, req.agents, user_id=user_id)
+
     formatter = HierarchicalFormatter()
     formatted = await formatter.format_council(
         req.question,
         result["responses"],
         result.get("synthesis", ""),
     )
-    
+
     return formatted
 
 
@@ -101,17 +101,17 @@ async def council_stream(req: CouncilRequest, user_id: str = Depends(get_user_id
     
     async def event_stream():
         orch = CouncilOrchestrator()
-        result = await orch.execute(req.question, req.context, req.agents)
-        
+        result = await orch.execute(req.question, req.context, req.agents, user_id=user_id)
+
         formatter = HierarchicalFormatter()
         formatted = await formatter.format_council(
             req.question,
             result["responses"],
             result.get("synthesis", ""),
         )
-        
+
         yield f"data: {json.dumps(formatted)}\n\n"
-    
+
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
