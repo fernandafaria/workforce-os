@@ -397,3 +397,35 @@ async def twin_ingest(
 async def twin_synthesize(twin_id: str, user_id: str = Depends(get_user_id)):
     """Stage 3 — Gera schema cognitivo via Claude Opus a partir do corpus."""
     return await _twin_pipeline.synthesize(twin_id)
+
+
+@app.post("/twins/{twin_id}/interview")
+async def twin_interview(
+    twin_id: str,
+    num_questions: Optional[int] = None,
+    session_label: Optional[str] = None,
+    user_id: str = Depends(get_user_id),
+):
+    """Stage 4 — Gera uma sessão de entrevista de N turnos com o twin."""
+    return await _twin_pipeline.interview(
+        twin_id, num_questions=num_questions, session_label=session_label
+    )
+
+
+@app.post("/twins/{twin_id}/eval")
+async def twin_eval(
+    twin_id: str,
+    num_probes: Optional[int] = None,
+    threshold: Optional[float] = None,
+    user_id: str = Depends(get_user_id),
+):
+    """Stage 5 — Avalia o twin contra chunks holdout (similaridade Voyage)."""
+    return await _twin_pipeline.eval(
+        twin_id, num_probes=num_probes, threshold=threshold
+    )
+
+
+@app.post("/twins/{twin_id}/publish")
+async def twin_publish(twin_id: str, user_id: str = Depends(get_user_id)):
+    """Stage 6 — Promove twin para status='eval_passed' se último eval passou."""
+    return await _twin_pipeline.publish(twin_id)

@@ -26,6 +26,11 @@ log = logging.getLogger(__name__)
 
 INGEST_FN = "twin-corpus-ingest"
 SYNTHESIZE_FN = "twin-synthesize"
+INTERVIEW_FN = "twin-interview"
+EVAL_FN = "twin-eval"
+
+PUBLISHABLE_STATUS = "eval_passed"  # next gate: production (manual)
+DRAFT_STATUS = "draft"
 
 
 class TwinPipeline:
@@ -89,6 +94,106 @@ class TwinPipeline:
         except Exception as e:
             log.warning(f"Twin synthesize failed for {twin_id}: {e}")
             return {"error": str(e)}
+
+    async def interview(
+        self,
+        twin_id: str,
+        *,
+        num_questions: Optional[int] = None,
+        session_label: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Stage 4 — Generate an N-turn interview session and persist."""
+        body: Dict[str, Any] = {"twin_id": twin_id}
+        if num_questions is not None:
+            body["num_questions"] = num_questions
+        if session_label:
+            body["session_label"] = session_label
+        try:
+            async with httpx.AsyncClient(timeout=180) as client:
+                resp = await client.post(
+                    self._edge_url(INTERVIEW_FN), headers=self._headers(), json=body,
+                )
+                return _safe_json(resp)
+        except Exception as e:
+            log.warning(f"Twin interview failed for {twin_id}: {e}")
+            return {"error": str(e)}
+
+    async def eval(
+        self,
+        twin_id: str,
+        *,
+        num_probes: Optional[int] = None,
+        threshold: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """Stage 5 — Run holdout-continuation eval and record `twin_eval_run`."""
+        body: Dict[str, Any] = {"twin_id": twin_id}
+        if num_probes is not None:
+            body["num_probes"] = num_probes
+        if threshold is not None:
+            body["threshold"] = threshold
+        try:
+            async with httpx.AsyncClient(timeout=180) as client:
+                resp = await client.post(
+                    self._edge_url(EVAL_FN), headers=self._headers(), json=body,
+                )
+                return _safe_json(resp)
+        except Exception as e:
+            log.warning(f"Twin eval failed for {twin_id}: {e}")
+            return {"error": str(e)}
+
+    async def publish(self, twin_id: str) -> Dict[str, Any]:
+        """Stage 6 — Promote a twin to ``eval_passed`` if last eval passed.
+
+        Pure SQL gate (no LLM): looks up the most recent ``twin_eval_run``
+        for this twin; if ``passed=true``, sets ``twin.status='eval_passed'``.
+        Moving on to ``production`` is a separate, intentional decision.
+        """
+        from supabase import create_client
+
+        client = create_client(
+            self.settings.supabase_url,
+            self.settings.supabase_service_role_key,
+        )
+        try:
+            last_eval = (
+                client.table("twin_eval_run")
+                .select("id, passed, created_at, scores_json, harness")
+                .eq("twin_id", twin_id)
+                .order("created_at", desc=True)
+                .limit(1)
+                .execute()
+            )
+            if not last_eval.data:
+                return {"published": False, "reason": "no eval runs"}
+            row = last_eval.data[0]
+            if not row.get("passed"):
+                return {
+                    "published": False,
+                    "reason": "last eval did not pass",
+                    "eval_id": row["id"],
+                    "scores": row.get("scores_json"),
+                }
+
+            upd = (
+                client.table("twin")
+                .update({"status": PUBLISHABLE_STATUS})
+                .eq("id", twin_id)
+                .execute()
+            )
+            if not upd.data:
+                return {"published": False, "reason": "twin update returned no rows"}
+
+            return {
+                "published": True,
+                "twin_id": twin_id,
+                "new_status": PUBLISHABLE_STATUS,
+                "eval_id": row["id"],
+                "harness": row.get("harness"),
+                "scores": row.get("scores_json"),
+            }
+        except Exception as e:
+            log.warning(f"Twin publish failed for {twin_id}: {e}")
+            return {"published": False, "error": str(e)}
 
 
 def _safe_json(resp: httpx.Response) -> Dict[str, Any]:
