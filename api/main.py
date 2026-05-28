@@ -429,3 +429,73 @@ async def twin_eval(
 async def twin_publish(twin_id: str, user_id: str = Depends(get_user_id)):
     """Stage 6 — Promove twin para status='eval_passed' se último eval passou."""
     return await _twin_pipeline.publish(twin_id)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Persona Lifecycle — eval, promote, deprecate, version snapshots
+# ═══════════════════════════════════════════════════════════════════════════
+
+from .lifecycle.personas import PersonaLifecycle
+
+_persona_lifecycle = PersonaLifecycle()
+
+
+class PersonaDeprecateRequest(BaseModel):
+    reason: str
+    supersedes_persona_slug: Optional[str] = None
+
+
+@app.post("/personas/{slug}/eval")
+async def persona_eval(
+    slug: str,
+    num_questions: Optional[int] = None,
+    threshold: Optional[float] = None,
+    create_baseline_if_missing: bool = True,
+    user_id: str = Depends(get_user_id),
+):
+    """Roda eval na persona — gera (ou usa) baseline + judge Opus."""
+    return await _persona_lifecycle.eval_persona(
+        slug,
+        num_questions=num_questions,
+        threshold=threshold,
+        create_baseline_if_missing=create_baseline_if_missing,
+    )
+
+
+@app.get("/personas/{slug}/eval/latest")
+async def persona_eval_latest(slug: str, user_id: str = Depends(get_user_id)):
+    """Último agent_eval_run pra essa persona."""
+    run = await _persona_lifecycle.last_eval_run(slug)
+    if not run:
+        raise HTTPException(404, f"no eval runs for '{slug}'")
+    return run
+
+
+@app.post("/personas/{slug}/promote")
+async def persona_promote(
+    slug: str,
+    threshold: float = 0.65,
+    user_id: str = Depends(get_user_id),
+):
+    """Promove para lifecycle_stage='promoted' se último eval passou."""
+    return await _persona_lifecycle.promote(slug, threshold=threshold)
+
+
+@app.post("/personas/{slug}/deprecate")
+async def persona_deprecate(
+    slug: str,
+    req: PersonaDeprecateRequest,
+    user_id: str = Depends(get_user_id),
+):
+    """Marca persona como deprecada; opcionalmente registra quem a substitui."""
+    return await _persona_lifecycle.deprecate(
+        slug,
+        reason=req.reason,
+        supersedes_persona_slug=req.supersedes_persona_slug,
+    )
+
+
+@app.post("/personas/{slug}/snapshot")
+async def persona_snapshot(slug: str, user_id: str = Depends(get_user_id)):
+    """Snapshot do persona_md atual em persona_versions (audit trail)."""
+    return await _persona_lifecycle.snapshot_version(slug)
