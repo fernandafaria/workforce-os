@@ -5,7 +5,7 @@ Production endpoints for Second Brain skin.
 Deploy: Railway
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -15,6 +15,7 @@ import json
 import asyncio
 
 from .config import get_settings
+from .auth import get_user_id
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +75,7 @@ async def health():
 
 
 @app.post("/council")
-async def council(req: CouncilRequest):
+async def council(req: CouncilRequest, user_id: str = Depends(get_user_id)):
     """Conselho 1:1 — CEO pergunta, sistema seleciona e orquestra especialistas."""
     from .orchestrator import CouncilOrchestrator
     from .formatter.hierarchical import HierarchicalFormatter
@@ -93,7 +94,7 @@ async def council(req: CouncilRequest):
 
 
 @app.post("/council/stream")
-async def council_stream(req: CouncilRequest):
+async def council_stream(req: CouncilRequest, user_id: str = Depends(get_user_id)):
     """Conselho 1:1 com SSE streaming."""
     from .orchestrator import CouncilOrchestrator
     from .formatter.hierarchical import HierarchicalFormatter
@@ -115,7 +116,7 @@ async def council_stream(req: CouncilRequest):
 
 
 @app.post("/group")
-async def group(req: GroupRequest):
+async def group(req: GroupRequest, user_id: str = Depends(get_user_id)):
     """Grupo debate — múltiplos agentes debatem em rounds."""
     from .orchestrator import GroupOrchestrator
     from .formatter.hierarchical import HierarchicalFormatter
@@ -130,7 +131,7 @@ async def group(req: GroupRequest):
 
 
 @app.post("/group/stream")
-async def group_stream(req: GroupRequest):
+async def group_stream(req: GroupRequest, user_id: str = Depends(get_user_id)):
     """Grupo debate com SSE streaming."""
     from .orchestrator import GroupOrchestrator
     from .formatter.hierarchical import HierarchicalFormatter
@@ -148,7 +149,7 @@ async def group_stream(req: GroupRequest):
 
 
 @app.get("/ping")
-async def ping(sector: Optional[str] = None, user_id: Optional[str] = None):
+async def ping(sector: Optional[str] = None, user_id: str = Depends(get_user_id)):
     """Briefing diário."""
     from .orchestrator import PingOrchestrator
     from .formatter.hierarchical import HierarchicalFormatter
@@ -196,7 +197,7 @@ async def list_domains():
 
 
 @app.post("/memories")
-async def store_memory(req: MemoryRequest):
+async def store_memory(req: MemoryRequest, user_id: str = Depends(get_user_id)):
     """Armazena uma decisão/observação na memória."""
     from .memory.store import MemoryStore
     store = MemoryStore()
@@ -204,7 +205,10 @@ async def store_memory(req: MemoryRequest):
 
 
 @app.get("/memories/{user_id}")
-async def get_memories(user_id: str, limit: int = 20):
+async def get_memories(user_id: str, limit: int = 20, auth_user_id: str = Depends(get_user_id)):
+    # Validate user can only access their own memories
+    if auth_user_id != user_id:
+        raise HTTPException(403, "Cannot access another user's memories")
     """Recupera memórias de um usuário."""
     from .memory.store import MemoryStore
     store = MemoryStore()
@@ -244,7 +248,7 @@ async def get_ritual(slug: str):
 
 
 @app.post("/rituals/{slug}/run")
-async def run_ritual(slug: str, topic: str, context: Optional[str] = None, agents: Optional[List[str]] = None):
+async def run_ritual(slug: str, topic: str, context: Optional[str] = None, agents: Optional[List[str]] = None, user_id: str = Depends(get_user_id)):
     """Executa um ritual (Board Review, Deep Dive, War Room, etc)."""
     result = await _ritual_orch.run_ritual(slug, topic, context, agents)
     if "error" in result:
@@ -258,10 +262,10 @@ async def run_ritual(slug: str, topic: str, context: Optional[str] = None, agent
 
 @app.post("/memories/pipeline/observe")
 async def memory_observe(
-    user_id: str,
     session_type: str,
     topic: str,
     agents: Optional[List[str]] = None,
+    user_id: str = Depends(get_user_id),
 ):
     """Fase 1: Salva observação bruta na memória (observational_memory)."""
     from .memory.pipeline import MemoryPipeline
@@ -271,10 +275,10 @@ async def memory_observe(
 
 @app.post("/memories/pipeline/distill")
 async def memory_distill(
-    user_id: str,
     session_content: str,
     session_type: str = "council",
     dry_run: bool = False,
+    user_id: str = Depends(get_user_id),
 ):
     """Fase 2: Extrai decisões, riscos, ações e perguntas da sessão (distill-memory protocol)."""
     from .memory.pipeline import MemoryPipeline
@@ -283,7 +287,7 @@ async def memory_distill(
 
 
 @app.post("/memories/pipeline/embed")
-async def memory_embed(user_id: str, limit: int = 50):
+async def memory_embed(user_id: str = Depends(get_user_id), limit: int = 50):
     """Fase 3: Gera embeddings Voyage para memórias não-indexadas."""
     from .memory.pipeline import MemoryPipeline
     pipeline = MemoryPipeline()
@@ -292,10 +296,10 @@ async def memory_embed(user_id: str, limit: int = 50):
 
 @app.get("/memories/search")
 async def memory_search(
-    user_id: str,
     query: str,
     memory_type: Optional[str] = None,
     limit: int = 10,
+    user_id: str = Depends(get_user_id),
 ):
     """Busca semântica em memórias (pgvector + Voyage)."""
     from .memory.pipeline import MemoryPipeline
@@ -306,12 +310,12 @@ async def memory_search(
 
 @app.post("/memories/pipeline/full")
 async def memory_full_pipeline(
-    user_id: str,
     session_type: str,
     topic: str,
     session_content: str,
     agents: Optional[List[str]] = None,
     dry_run: bool = False,
+    user_id: str = Depends(get_user_id),
 ):
     """Pipeline completo: observa → destila → gera embeddings."""
     from .memory.pipeline import MemoryPipeline
