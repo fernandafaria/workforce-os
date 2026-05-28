@@ -3,9 +3,13 @@ Workforce OS — Central Router
 Routes CEO questions to the best specialist agents.
 
 Strategy: Hybrid
-  1. pgvector semantic similarity (Voyage embeddings)
+  1. pgvector semantic similarity (Voyage voyage-4, 1024d)
   2. Deterministic domain rules (DOMAIN_AGENT_MAP)
-  3. LLM refinement (optional, for ambiguous queries)
+  3. Team diversity in top-k (avoid 3 agents from same home_team)
+
+Routing is delegated to AgentCatalog.match() which calls the canonical
+match_personas() RPC in Supabase. The router only handles selection
+policy (top-k, diversity, explicit overrides).
 """
 
 from typing import List, Optional
@@ -19,7 +23,7 @@ log = logging.getLogger(__name__)
 
 class CentralRouter:
     """Routes natural language questions to specialist agents."""
-    
+
     def __init__(self):
         self.catalog = AgentCatalog()
         self.settings = get_settings()

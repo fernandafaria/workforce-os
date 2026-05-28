@@ -211,33 +211,88 @@ Seja direto, acionável e honesto. Se houver riscos, mencione-os explicitamente.
         question: str,
         context: Optional[str] = None,
         agent_slugs: List[str] = None,
+        user_id: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Run a council session."""
+        """Run a council session.
+
+        If user_id is provided, recent distilled memories for this executive
+        are injected into the context so the council is not amnesic across
+        sessions.
+        """
         from ..router.central import CentralRouter
-        
+        from ..memory.pipeline import MemoryPipeline
+
         # 1. Route to agents
         router = CentralRouter()
         agents = await router.route(question, agent_slugs)
-        
-        # 2. Run LangGraph
+
+        # 2. Augment context with recent memories of this executive
+        augmented_context = context or ""
+        if user_id:
+            try:
+                pipeline = MemoryPipeline()
+                memories = await pipeline.search(user_id, question, limit=5)
+                if memories:
+                    memory_block = "\n".join(
+                        f"- [{m.get('memory_type','memory')}] "
+                        f"{m.get('title') or m.get('content','')[:120]}"
+                        for m in memories[:5]
+                    )
+                    augmented_context = (
+                        (augmented_context + "\n\n" if augmented_context else "")
+                        + "DECISÕES E OBSERVAÇÕES PASSADAS DESTE EXECUTIVO "
+                        + "(considere ao responder, não repita):\n"
+                        + memory_block
+                    )
+            except Exception as e:
+                log.warning(f"Memory injection failed (non-fatal): {e}")
+
+        # 3. Run LangGraph
         initial_state: CouncilState = {
             "question": question,
-            "context": context,
+            "context": augmented_context,
             "agents": agents,
             "framed_prompts": [],
             "responses": [],
             "synthesis": "",
             "error": None,
         }
-        
+
         result = await self.graph.ainvoke(initial_state)
-        
+
+        # 4. Persist session for future memory injection (fire-and-forget)
+        if user_id:
+            asyncio.create_task(
+                self._persist(user_id, question, agents, result.get("responses", []),
+                              result.get("synthesis", ""))
+            )
+
         return {
             "question": question,
             "agents": agents,
             "responses": result.get("responses", []),
             "synthesis": result.get("synthesis", ""),
         }
+
+    async def _persist(self, user_id: str, question: str,
+                       agents: List[Dict[str, Any]],
+                       responses: List[Dict[str, Any]],
+                       synthesis: str) -> None:
+        try:
+            from ..memory.pipeline import MemoryPipeline
+            pipeline = MemoryPipeline()
+            await pipeline.observe(
+                user_id=user_id,
+                session_type="council",
+                topic=question[:200],
+                agents=[a["slug"] for a in agents],
+                raw_output={"summary": synthesis,
+                            "responses": [{"agent": r["agent"],
+                                           "content": (r.get("content") or "")[:500]}
+                                          for r in responses]},
+            )
+        except Exception as e:
+            log.warning(f"Council memory persist failed (non-fatal): {e}")
 
 
 # ═══════════════════════════════════════════════════════════════════════════

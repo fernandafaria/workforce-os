@@ -5,7 +5,7 @@ uvicorn[standard]>=0.34.0
 pydantic>=2.0
 pydantic-settings>=2.0
 
-# Supabase
+# Supabase (used directly by AgentCatalog, MemoryPipeline, auth)
 supabase>=2.0
 
 # LangGraph (orchestration)
@@ -22,11 +22,11 @@ langchain-core>=0.3.0
 # Templates
 jinja2>=3.1
 
-# HTTP client (async LLM calls)
+# HTTP client (async LLM + Voyage calls)
 httpx>=0.28.0
 
 # YAML (rituals)
 pyyaml>=6.0
 
-# CORS
-# (included in fastapi)
+# Rate limiting (Upstash Redis-compatible)
+slowapi>=0.1.9

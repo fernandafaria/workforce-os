@@ -79,17 +79,17 @@ async def council(req: CouncilRequest, user_id: str = Depends(get_user_id)):
     """Conselho 1:1 — CEO pergunta, sistema seleciona e orquestra especialistas."""
     from .orchestrator import CouncilOrchestrator
     from .formatter.hierarchical import HierarchicalFormatter
-    
+
     orch = CouncilOrchestrator()
-    result = await orch.execute(req.question, req.context, req.agents)
-    
+    result = await orch.execute(req.question, req.context, req.agents, user_id=user_id)
+
     formatter = HierarchicalFormatter()
     formatted = await formatter.format_council(
         req.question,
         result["responses"],
         result.get("synthesis", ""),
     )
-    
+
     return formatted
 
 
@@ -101,17 +101,17 @@ async def council_stream(req: CouncilRequest, user_id: str = Depends(get_user_id
     
     async def event_stream():
         orch = CouncilOrchestrator()
-        result = await orch.execute(req.question, req.context, req.agents)
-        
+        result = await orch.execute(req.question, req.context, req.agents, user_id=user_id)
+
         formatter = HierarchicalFormatter()
         formatted = await formatter.format_council(
             req.question,
             result["responses"],
             result.get("synthesis", ""),
         )
-        
+
         yield f"data: {json.dumps(formatted)}\n\n"
-    
+
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
@@ -333,3 +333,67 @@ from .mcp_server import mcp
 
 mcp_app = mcp.http_app(path="/mcp")
 app.mount("/mcp", mcp_app)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Twins — cognitive twins of real people (catalog + creation pipeline)
+# ═══════════════════════════════════════════════════════════════════════════
+
+from .twins.catalog import TwinCatalog
+from .twins.pipeline import TwinPipeline
+
+_twin_catalog = TwinCatalog()
+_twin_pipeline = TwinPipeline()
+
+
+@app.get("/twins")
+async def list_twins(
+    twin_kind: Optional[str] = None,
+    status: Optional[str] = None,
+    include_drafts: bool = False,
+    limit: int = 100,
+):
+    """Catálogo de twins (cognitive twins de pessoas reais).
+
+    Por padrão retorna só os published. include_drafts=true mostra
+    manifestos em desenvolvimento.
+    """
+    twins = await _twin_catalog.list_twins(
+        twin_kind=twin_kind,
+        status=status,
+        include_drafts=include_drafts,
+        limit=limit,
+    )
+    return {"twins": twins, "total": len(twins)}
+
+
+@app.get("/twins/{twin_id}")
+async def get_twin(twin_id: str):
+    """Detalhe completo de um twin + status do pipeline."""
+    twin = await _twin_catalog.get_twin(twin_id)
+    if not twin:
+        raise HTTPException(404, f"Twin '{twin_id}' not found")
+    return twin
+
+
+@app.get("/twins/{twin_id}/status")
+async def twin_status(twin_id: str):
+    """Status do pipeline: chunks ingeridos, sintetizado, eval, etc."""
+    return await _twin_catalog.get_status(twin_id)
+
+
+@app.post("/twins/{twin_id}/ingest")
+async def twin_ingest(
+    twin_id: str,
+    max_sources: Optional[int] = None,
+    force: bool = False,
+    user_id: str = Depends(get_user_id),
+):
+    """Stage 2 — Ingere fontes URL do twin (crawl + chunk + Voyage embed)."""
+    return await _twin_pipeline.ingest(twin_id, max_sources=max_sources, force=force)
+
+
+@app.post("/twins/{twin_id}/synthesize")
+async def twin_synthesize(twin_id: str, user_id: str = Depends(get_user_id)):
+    """Stage 3 — Gera schema cognitivo via Claude Opus a partir do corpus."""
+    return await _twin_pipeline.synthesize(twin_id)
