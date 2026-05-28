@@ -2,7 +2,7 @@
 //
 // Stage 5 of twin creation: evaluate fidelity against held-out corpus.
 //
-// Harness: "holdout_continuation"
+// Harness: "holdout_cosine"
 //   For each holdout chunk, take first ~50% as a prefix, ask the twin
 //   (Claude Opus + synthesized schema as system prompt) to continue,
 //   then compare the twin's continuation vs the actual continuation
@@ -176,7 +176,7 @@ Deno.serve(async (req) => {
     .from("twin_eval_run")
     .insert({
       twin_id: body.twin_id,
-      harness: "holdout_continuation",
+      harness: "holdout_cosine",
       scores_json: scoresJson,
       passed,
       notes: `${perProbe.length} probes vs threshold ${threshold}; voyage-4 cosine`,
@@ -187,13 +187,13 @@ Deno.serve(async (req) => {
   if (insErr) return json({ error: `eval_run insert failed: ${insErr.message}` }, 500);
 
   // Also surface aggregate into twin.eval_scores for quick filter/list
-  const evalScores = { harness: "holdout_continuation", mean_similarity: mean, threshold, passed, ran_at: new Date().toISOString() };
+  const evalScores = { harness: "holdout_cosine", mean_similarity: mean, threshold, passed, ran_at: new Date().toISOString() };
   await supabase.from("twin").update({ eval_scores: evalScores, updated_at: new Date().toISOString() }).eq("id", body.twin_id);
 
   return json({
     twin_id: body.twin_id,
     eval_id: evalRow?.id,
-    harness: "holdout_continuation",
+    harness: "holdout_cosine",
     score: mean,
     threshold,
     passed,
