@@ -1,0 +1,49 @@
+# Autonomous dry-run over the remaining 29 candidates.
+#
+# File-triggered → workflow forces mode=dry-run → run_all iterates all slugs
+# in one invocation. Zero API cost. Output in run_all_report.json artifact.
+# mrv-rubens-menin was already covered by 001.
+#
+# Re-dispatch (v2): bumped after shlex-quote fix in workflow. See commit
+# e56cc5c.
+
+slugs:
+  # Block A — Alimento processado SP (anchor, 7 remaining)
+  - predilecta-vinicius-rosa
+  - bauducco-scaramussa
+  - wickbold-fernanda
+  - dori-alimentos-ramos
+  - marilan-tommaso
+  - hikari-ogawa
+  - panco-lamaita
+  - grupo-trigo-facchina
+
+  # Block B — Industrial médio SP não-alimento (7)
+  - sabo-ushikubo
+  - romi-industrias
+  - iochpe-maxion-ioschpe
+  - cury-construtora
+  - metalfrio-rabin
+  - ache-laboratorios
+  - coteminas-cunha
+
+  # Block C — Outras regiões, mesmo arquétipo (9 remaining)
+  - randon-daniel
+  - marcopolo-bellini
+  - weg-schmelzer
+  - malwee-weege
+  - tigre-hansen
+  - duas-rodas-hermann
+  - boticario-krigsner
+  - marisol-schmitz
+  - m-dias-branco-ivens
+
+  # Block D — Conglomerados familiares SP (5)
+  - suzano-feffer
+  - klabin-lafer
+  - cosan-ometto
+  - ultrapar-cunha
+  - votorantim-ermirio
+
+skip_transcribe: false
+skip_build_eval: false

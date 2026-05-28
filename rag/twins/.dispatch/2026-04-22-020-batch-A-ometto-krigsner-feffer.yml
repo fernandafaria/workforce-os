@@ -1,0 +1,24 @@
+# Full-mode BATCH A — Twins 2/3/4 of the 7 high-corpus patriarchs.
+#
+# After Menin validated the pipeline end-to-end with gate=true (p70=0.794),
+# this dispatch scales to 3 more in a single run. run_all.py processes
+# slugs sequentially, so total wall-clock ≈ sum(per-person wall-clock).
+#
+# Per person estimate (with Groq+proxy+throttled eval):
+#   - transcribe: 3-4 YouTube x ~60-90s = 3-6 min
+#   - ingest (18+ URLs): 2-3 min
+#   - build: ~15s
+#   - eval: 65s cooldown + ~10 holdouts x 30s = ~5-6 min
+# Total per person: ~11-15 min. 3 persons: ~35-45 min. Safely within 90min cap.
+#
+# Batch B (klabin-lafer, malwee-weege, randon-daniel) fires after this
+# one completes — splitting avoids a single-run timeout risk.
+
+slugs:
+  - cosan-ometto
+  - boticario-krigsner
+  - suzano-feffer
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

@@ -1,0 +1,30 @@
+# Twins dispatch — Aaru founders FULL MODE (3 operators, public figures)
+#
+# Sequel to 2026-05-05-033 (dry-run) que passou com:
+#   - cam-fink:     52.210 tokens, 50 chunks, 4 source types
+#   - john-kessler: 43.187 tokens, 68 chunks, 4 source types
+#   - ned-koh:      34.502 tokens, 40 chunks, 4 source types
+# Todos > 10k threshold, ≥2 source types, sem url_sanity_warnings.
+#
+# Únicas falhas do dry-run: 4 URLs LinkedIn (Firecrawl policy
+# "Website Not Supported"). Não-bloqueante — LinkedIn era cosmético.
+#
+# Full mode rodará:
+#   - transcribe via DO runner + Webshare proxy: 5 YouTube + audio
+#     (CNBC Squawk Box, CNBC Mad Money Cramer, Squawk Pod,
+#      Yahoo Finance/Lipton)
+#   - ingest_person: refetch das 32 sources não-LinkedIn
+#   - build_twin: extrai CompanyContext + LinguisticProfile +
+#     DecisionFingerprint + OperatorProfile via Anthropic tool use
+#   - eval_twin: holdout cosine p70, gate threshold 0.75 (public figure)
+#
+# Estimativa: ~30-45 min wall-clock total (3 founders sequential).
+
+slugs:
+  - cam-fink
+  - ned-koh
+  - john-kessler
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

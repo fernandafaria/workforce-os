@@ -1,0 +1,23 @@
+# RETRY — archetype prototype dispatch (original 026 never registered
+# because the Copilot merge-conflict resolution left the PR HEAD
+# pointing to ec794fd; my commit 4d17926 pushed to the branch but the
+# workflow never fired).
+#
+# Same payload as 026:
+#   arch-c-mae-se-urbano   (Brazilian class C mother, SE urban)
+#   arch-a-clevel-jovem    (class A young C-level, MBA top-tier)
+#
+# Expected behavior: both should build successfully (we added
+# authorization=archetype_synthetic to the enum), eval gate runs with
+# standard p70 >= 0.75 threshold (we didn't change the threshold in
+# code — the 0.70 in the 026 spec commentary was about validation
+# framing, not actual code config). If p70 <= 0.70 for both, archetype
+# corpus composition needs more 1st-person voice data.
+
+slugs:
+  - arch-c-mae-se-urbano
+  - arch-a-clevel-jovem
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

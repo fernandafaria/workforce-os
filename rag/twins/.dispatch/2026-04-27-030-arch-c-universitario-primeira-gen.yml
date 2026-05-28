@@ -1,0 +1,32 @@
+# Dispatch 030 — Fase 1 #1/5: arch-c-universitario-primeira-gen.
+#
+# Primeiro archetype da Fase 1 conforme BRAZILIAN_ARCHETYPES_ROADMAP.md §5
+# (corpus mais robusto primeiro, magro por último). Corpus já ingestado
+# no DO runner: 543 chunks / 107 holdouts (cobertura est. ~6M jovens BR
+# 18-24 em graduação pública, primeira geração da família).
+#
+# Gate Hamel Layer-1: p70 ≥ 0.72 (limiar archetype_synthetic).
+# Custo esperado: ~$5 Anthropic + Voyage embeddings.
+# Timeout do job: 90min (corpus 543 chunks > 300, próximo do limite).
+#
+# Pré-condições:
+# - skip_transcribe=true porque corpus já está em _corpus/* no DO runner
+#   (ingestão prévia validada quando spec foi escrito). Re-fetch YouTube
+#   via Webshare seria redundante e gastaria proxy quota desnecessariamente.
+# - Webshare proxy fica configurado no DO runner caso precise re-ingest
+#   parcial (defensive default no workflow).
+#
+# Próximos da fila Fase 1 (1 dispatch/dia):
+#   2. arch-c-aposentado-inss (393 chunks)
+#   3. arch-d-adolescente-periferia (148 chunks)
+#   4. arch-d-desempregada-mae-solo (71 chunks — risco de gate)
+#   5. arch-b-pequeno-empresario (61 chunks — risco de gate)
+#
+# Se passar gate: sync para Supabase fica pendente até passos operacionais
+# 1-6 da Fase 0 fecharem (HNSW verify + sync + re-eval — ver §9 do roadmap).
+
+slug: arch-c-universitario-primeira-gen
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

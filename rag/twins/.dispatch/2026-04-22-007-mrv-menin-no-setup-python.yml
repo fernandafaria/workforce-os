@@ -1,0 +1,7 @@
+# Full-mode run v5 — removed setup-python@v5 + sudo apt (self-hosted
+# runner already has python3 + ffmpeg from setup-twins-runner.sh).
+# Also added early env diagnostic captured to /tmp.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true

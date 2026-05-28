@@ -1,0 +1,37 @@
+# Full-mode BATCH ALL 6 — Ometto, Krigsner, Feffer, Lafer, Weege, Randon.
+#
+# Dispatch 021 revealed the real gate-blocker isn't the pipeline — it's
+# corpus starvation. All 6 specs had ~4 fictional `path:` entries
+# pointing to _corpus/*.md files that never existed (template
+# placeholders) + LinkedIn URLs that Firecrawl explicitly refuses.
+#
+# Net effect on 021's 3 persons: cosan-ometto got 7 chunks / 2 holdouts
+# (vs Menin's 55 / 11), p70=0.74 — one text source away from passing.
+# boticario 12/2, feffer 4/2.
+#
+# Fix committed in same batch: replace fictional paths + LinkedIn in
+# all 6 specs with real Firecrawl-scrapeable URLs:
+#   - Wikipedia PT + Wikipedia EN (biography + company)
+#   - InfoMoney profile page (when present)
+#   - Corporate RI (kept from original)
+#
+# Each spec now has 3-4 YouTube + 4-5 text URLs = 7-9 real sources.
+# Expected: ~30-55 chunks / 6-11 holdouts per person, enough for
+# Hamel p70 to cross 0.75 on the 2-3 corpus-rich patriarchs.
+#
+# Single batch of 6 is safe: captions-api confirmed working for all
+# 3 prior persons in seconds (no Whisper cost), and Firecrawl text
+# scrape ~1s/URL. Estimated per-person wall-clock ~12-15 min with
+# eval throttle. 6 persons x 12 min = 72 min, within the 90 min cap.
+
+slugs:
+  - cosan-ometto
+  - boticario-krigsner
+  - suzano-feffer
+  - klabin-lafer
+  - malwee-weege
+  - randon-daniel
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

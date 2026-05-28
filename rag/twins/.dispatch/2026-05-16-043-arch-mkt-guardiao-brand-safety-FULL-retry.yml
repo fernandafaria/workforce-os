@@ -1,0 +1,18 @@
+# Dispatch 043 — retry guardiao-brand-safety após fix do YTDLP_PROXY.
+#
+# Dispatch 042 falhou: YTDLP_PROXY estava com conteúdo bruto do arquivo
+# de proxies Webshare (10 linhas "IP:PORT:USER:PASS") ao invés de
+# uma URL HTTP única. Resultado:
+#   - Firecrawl: "Failed to parse:" + multi-linha do secret → 0/18 fetched
+#   - yt-dlp: "nonnumeric port: 'izbf1873j853'" → password tratado como port
+#
+# @fernanda atualizou o secret pra URL única (formato canônico
+# http://USER:PASS@IP:PORT). Retry mesma persona pra validar fix.
+#
+# IMPORTANTE: não mergear até diagnostic postar.
+
+slug: arch-mkt-guardiao-brand-safety
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

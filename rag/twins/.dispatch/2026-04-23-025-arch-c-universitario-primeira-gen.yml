@@ -1,0 +1,14 @@
+# Archetype #25 — Universitário primeira geração, classe C
+#
+# Especificação para dispatch autônomo via GitHub Actions.
+# File-triggered: workflow `.github/workflows/twins-run.yml` executa
+# `python -m rag.twins.run_all --only arch-c-universitario-primeira-gen --mode full`.
+#
+# Corpus: 543 chunks já ingestados no DO runner (holdout: 107).
+# Esperado: p70 ≥ 0.72 para passar production gate.
+
+slug: arch-c-universitario-primeira-gen
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

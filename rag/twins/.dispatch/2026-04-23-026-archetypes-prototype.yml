@@ -1,0 +1,33 @@
+# PROTOTYPE — first 2 of 40 Brazilian population archetypes.
+#
+# Different playbook from individual-twin pipeline: corpus is public
+# ethnographic + journalistic + aggregated podcast interviews about
+# population clusters, not a single named person.
+#
+# Validates two things before scaling to the other 38:
+#   1. Gate mechanics still work (p70 cosine + new authorization enum)
+#   2. Gate DISCRIMINATES — classe C mãe SE vs classe A C-level jovem
+#      must produce linguistically distinct twins. If both end up with
+#      same tone/vocabulary → gate isn't tight enough for archetype
+#      use, need to recalibrate.
+#
+# Specs:
+#   arch-c-mae-se-urbano  (cluster maior do consumo BR, ~25M pessoas)
+#   arch-a-clevel-jovem   (alto contraste, ~400k pessoas)
+#
+# Success criteria (prototype):
+#   - Both build cleanly with authorization=archetype_synthetic
+#   - Both p70 >= 0.70 (slightly relaxed vs 0.75 pessoa-pública —
+#     corpus é agregado, não 1ª pessoa)
+#   - Manual inspection of twin responses to a fixed set of 5 discovery
+#     prompts shows distinct vocabulary/concerns per archetype.
+#
+# If both criteria hit: schema validated, we scale to remaining 38.
+
+slugs:
+  - arch-c-mae-se-urbano
+  - arch-a-clevel-jovem
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

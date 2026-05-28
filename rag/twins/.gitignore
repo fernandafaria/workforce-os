@@ -1,0 +1,11 @@
+# Local-run artifacts (never checked in)
+twins.db
+twins.db-*
+.transcribe_cache/
+run_all_report.json
+
+# Transcripts live under persons/_corpus/ and are populated by transcribe.py
+# on a per-operator basis. They contain potentially-copyrighted third-party
+# material (podcast transcripts, news articles) — do not commit.
+persons/_corpus/*/
+!persons/_corpus/.gitkeep

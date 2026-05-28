@@ -1,0 +1,33 @@
+# Dispatch: FULL-mode ingestion of pop-brasileira-2026 reference corpus.
+#
+# Follow-up to dispatch 031 (dry-run, validated all 41 URLs reachable).
+# Triggers the full pipeline on the DO runner (Webshare proxy):
+#   transcribe → ingest → build → eval
+#
+# Why full (not skip_build_eval): even though pop-brasileira-2026 is a
+# reference corpus and not a personal twin, running build/eval still
+# validates the chunks are coherent enough for downstream regeneration of
+# the briefing via Opus. Cost trade-off accepted (~$5+) — see PR for
+# rationale.
+#
+# Cost expectation: ~$5+ split across:
+# - Whisper (Groq): free for non-captioned YouTube
+# - YouTube captions: free
+# - Firecrawl: ~$0.02 (19 article URLs)
+# - Voyage embeddings: ~$0.02 (~152k tokens × $0.12/1M)
+# - Anthropic Opus build_twin: $1-3 (extracts twin model from corpus)
+# - Anthropic Opus eval_twin: $0.50-2 (holdout cosine eval)
+#
+# What this populates:
+# - rag/twins/twins.db (SQLite, persisted in workflow artifact 14d)
+# - chunks_total ≈ 232 with Voyage embeddings ready for similarity search
+# - Once landed, briefing can be regenerated from chunks via Opus for
+#   higher fidelity than the current hand-synthesized version.
+
+slug: pop-brasileira-2026
+persons_dir: rag/twins/shared
+
+mode: full
+confirm_full_mode: true   # required for full mode (gates real cost)
+skip_transcribe: false    # fetch via Webshare proxy
+# skip_build_eval intentionally absent → run all 4 stages

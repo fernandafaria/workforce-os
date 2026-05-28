@@ -1,0 +1,16 @@
+# Full-mode TEXT-ONLY v3 — Twin #1 (Rubens Menin / MRV).
+#
+# Fixes silent failure discovered in dispatch 010: `Verify specs exist`
+# and `Run twins pipeline` steps invoked `python -c` / `python -m`, but
+# Ubuntu 24.04 self-hosted runner only ships `python3` (no `python`
+# symlink). The steps crashed with "command not found" and set -euo
+# pipefail killed the job before run_all_report.json was written.
+#
+# This dispatch re-fires Menin with the python3 fix applied, plus
+# captured step logs in the diagnostic PR comment so any further
+# failure surfaces immediately.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

@@ -1,0 +1,8 @@
+# Full-mode run v6 — youtube-transcript-api 1.0+ API compat fix.
+# Previous runs failed because I was using the legacy class-method API
+# (YouTubeTranscriptApi.list_transcripts) which was removed in 1.0.
+# Now uses api = YouTubeTranscriptApi(); api.list(video_id).
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true

@@ -1,0 +1,15 @@
+# Full-mode TEXT-ONLY — Twin #1 (Rubens Menin / MRV).
+#
+# skip_transcribe=true bypasses YouTube entirely (captions + yt-dlp both
+# blocked from DO droplet IP). Ingest uses Firecrawl on 10 open-text URLs
+# added to the spec: Wikipedia EN, InfoMoney perfil+columns, Brazil
+# Journal articles, Seu Dinheiro, MRV RI, LinkedIn. Build twin via Opus,
+# eval holdout cosine.
+#
+# Cost estimate: ~$2-5 (Firecrawl scrapes + Opus + Voyage, no Whisper).
+# Time: ~8-12 min wall-clock.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

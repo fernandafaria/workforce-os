@@ -1,0 +1,10 @@
+# Full-mode run v2 — Twin #1 (Rubens Menin / MRV), auditable.
+#
+# Rerun after adding preflight + acceptance summary to twins-run.yml.
+# Preflight proves yt-dlp can reach YouTube from the runner before any
+# money is spent. Acceptance summary makes the outcome obvious without
+# digging into logs.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true

@@ -1,0 +1,10 @@
+# Full-mode run — Twin #1 (Rubens Menin / MRV).
+#
+# File-trigger opt-in for FULL mode (costs ~$8-20 in Whisper + Opus + Voyage).
+# Authorized by Fernanda: "pode disparar". 7 YouTube episode URLs in the spec
+# will be transcribed via yt-dlp + Whisper, ingested, embedded via Voyage,
+# and the twin will be extracted + Hamel layer-1 evaluated.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true

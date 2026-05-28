@@ -1,0 +1,37 @@
+# Dispatch 032 — re-build arch-c-mae-se-urbano com corpus YT expandido.
+#
+# Motivação: dispatch 031 (skip_transcribe: true, cache only) produziu twin
+# com p70=0.613 e archetype_label "Corpus indisponível — perfil não
+# fundamentado" porque o cache _corpus continha só 2 chunks dos 3 vídeos
+# YouTube originais (ver PR #263 diagnostic comment 4336580522). O resto
+# do corpus virou IBGE + Wikipedia, o que o agente entrevistado
+# corretamente detectou e recusou inventar (transcript v004 in PR #263).
+#
+# Mudanças no spec arch-c-mae-se-urbano.yaml (commit anterior):
+#   - 3 YT sources originais MANTIDOS (refetch pode resolver cache stale)
+#   - +6 YT sources novos descobertos via WebSearch:
+#       1. Mulheres da Cidade Tiradentes (26 depoimentos, doc 2017)
+#       2. Mulheres negras da periferia SP (doc 2018)
+#       3. Papel das mulheres moradoras da periferia (doc 2017)
+#       4. Conversa de Portão #28 (mulheres da periferia 2022)
+#       5. YES WE CAT — Semayat Oliveira (Nós Mulheres da Periferia 2017)
+#       6. O feminismo da periferia (2018)
+#   - Total: 9 YT sources tipo interview/first_person
+#
+# skip_transcribe: false → Whisper + captions-api refetch via Webshare proxy
+# pra TODOS os 9 YT sources. Custo Whisper ~$1-2 + Anthropic build ~$5
+# + Voyage embeddings ~$0.5. Total esperado: ~$7. Wall clock: 30-45 min
+# (mais longo que 031 por causa do refetch).
+#
+# Gate Hamel Layer-1: p70 ≥ 0.72 (limiar archetype_synthetic). Histórico
+# era 0.744 — esperamos voltar a esse nível ou superar com corpus maior.
+#
+# Risco: alguns dos 6 vídeos novos podem ter captions vazias / áudio
+# bot-blocked. Pipeline falha graciosamente per-URL via fallback yt-dlp +
+# Whisper. Quanto mais sources sobreviverem, melhor o p70.
+
+slug: arch-c-mae-se-urbano
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

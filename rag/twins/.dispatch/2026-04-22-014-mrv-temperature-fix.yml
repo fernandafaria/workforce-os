@@ -1,0 +1,23 @@
+# Full-mode TEXT-ONLY v6 — Twin #1 (Rubens Menin / MRV).
+#
+# Dispatch 013 was a MAJOR breakthrough: Firecrawl v4 fix worked and
+# ingest succeeded with 18/21 sources, 58 chunks, 12 holdout, 42524
+# tokens. run_all_report.json was finally written.
+#
+# Two remaining issues surfaced:
+# 1. Build step: BadRequestError "`temperature` is deprecated for this
+#    model" (claude-opus-4-7 no longer accepts temperature). FIXED in
+#    build_twin.py by conditionally passing temperature only for models
+#    that still accept it.
+# 2. Voyage free tier: 429s from 3 RPM limit — ingest still completed
+#    via retry but slow (234s). Would benefit from paid tier for eval
+#    step. NOT BLOCKING; monitoring only.
+#
+# Expected outcome: ingest unchanged (58 chunks), build succeeds,
+# holdout eval runs, final gate pass/fail surfaces in acceptance
+# summary.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

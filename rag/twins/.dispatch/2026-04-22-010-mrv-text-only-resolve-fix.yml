@@ -1,0 +1,13 @@
+# Full-mode TEXT-ONLY v2 — Twin #1 (Rubens Menin / MRV).
+#
+# Fixes the Resolve-step failures that plagued dispatches 003-009:
+# standalone parse_twins_dispatch.py script + captions_probe.py script
+# (heredoc inline Python was breaking with IndentationError).
+#
+# Same strategy: skip_transcribe=true (YouTube blocked from this droplet).
+# Corpus comes from 12 Firecrawl-scrapeable URLs on the Menin spec.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

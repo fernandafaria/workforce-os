@@ -1,0 +1,20 @@
+# Lote B Tier 1 CMOs — dry-run validation (12 slugs, post authorization: granted fix).
+# Run before FULL batch; same list as 2026-05-16-043-cmo-tier1-dryrun-v2.yml.
+
+slugs:
+  - daniela-cachich
+  - eduardo-tracanella
+  - juliana-cury
+  - alexia-duffles
+  - karla-felmanas
+  - andre-britto
+  - marcelo-bronze
+  - marcio-carvalho
+  - renata-altenfelder
+  - guilherme-bernardes
+  - tatiana-ponce
+  - cathyelle-schroeder
+
+mode: dry-run
+skip_transcribe: false
+skip_build_eval: false

@@ -1,0 +1,38 @@
+# RETRY — archetype prototype with REAL URLs this time.
+#
+# Dispatch 027 failed because I fabricated YouTube IDs — all 6 URLs
+# returned "video not found" via the captions/proxy pipeline. Both
+# archetypes ended up with text-only corpus and missed the gate:
+#   arch-c-mae-se-urbano:  p70=0.668 (11 holdouts, 0 YouTube)
+#   arch-a-clevel-jovem:   p70=0.496 (5 holdouts, 0 YouTube)
+#
+# Spec updates (same branch):
+#
+# arch-a-clevel-jovem:
+#   - Replaced 3 fake YouTube IDs with 4 real URLs verified via
+#     WebSearch (Márcio Fernandes, Miguel Gularte BRF, G4 Podcasts
+#     2025 focus, Misa Antonini G4 Educação).
+#
+# arch-c-mae-se-urbano:
+#   - Removed 3 fake YouTube IDs entirely. Realized Brazilian major
+#     podcasts (Mamilos, Mano a Mano) interview public figures class
+#     A/B, not typical class C mothers — wrong voice profile.
+#   - Added 6 text URLs with extensive 1st-person quotes from real
+#     women in the segment: Museu da Pessoa life history, Geledés
+#     profile, Unisinos IHU peripheral-dreams interview, Fiocruz
+#     mães solo, Habitat Brasil testimonies, Portal Pepper, Scielo
+#     academic frame.
+#
+# Hypothesis: both should now pass p70 >= 0.75 (same threshold as
+# patriarchs — corpus is rich enough that we don't need the relaxed
+# 0.70 anymore). If archetype-c-mae still fails, the gate is
+# genuinely discriminating against 3rd-person-quoted corpus and we
+# need a new approach (e.g. Piauí-style longform paste-ins).
+
+slugs:
+  - arch-c-mae-se-urbano
+  - arch-a-clevel-jovem
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

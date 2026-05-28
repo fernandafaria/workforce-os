@@ -1,0 +1,9 @@
+# Autonomous dry-run dispatch — Twin #1 candidate (Rubens Menin / MRV).
+#
+# File-triggered: workflow `.github/workflows/twins-run.yml` picks this up on
+# push and runs `python -m rag.twins.run_all --only mrv-rubens-menin --dry-run`.
+# Full mode via file trigger is blocked — this only previews the plan.
+
+slug: mrv-rubens-menin
+skip_transcribe: false
+skip_build_eval: false

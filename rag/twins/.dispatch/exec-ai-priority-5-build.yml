@@ -1,0 +1,15 @@
+# Priority P0 build batch — 5 executive AI fluency archetypes (FULL on twins runner).
+# Trigger: gh workflow run "Twins — run via ops trigger" after merge to main,
+# or workflow_dispatch per slug on branch cursor/exec-ai-fluency-cohort-200-8c33.
+
+slugs:
+  - arch-exec-ai-travada-chatgpt-sp-cap-listada
+  - arch-exec-ai-fomo-demo-comprador-sp-cap-listada
+  - arch-exec-ai-cfo-cetico-roi-sp-cap-listada
+  - arch-exec-ai-cmo-delega-junior-sp-cap-listada
+  - arch-exec-ai-founder-scaleup-impostor-sp-cap-listada
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: true
+skip_build_eval: false

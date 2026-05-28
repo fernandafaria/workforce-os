@@ -1,0 +1,17 @@
+# Lote B Tier 2 CMOs — FULL pipeline (8 slugs).
+# Cohort: rag/twins/marketing_discovery_manifest.py::CMO_TIER2
+
+slugs:
+  - felipe-cohen
+  - renato-camargo
+  - igor-puga
+  - pethra-ferraz
+  - cecilia-bottai-mondino
+  - bernardo-marotta
+  - daniel-machado-campos
+  - analigia-martins
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

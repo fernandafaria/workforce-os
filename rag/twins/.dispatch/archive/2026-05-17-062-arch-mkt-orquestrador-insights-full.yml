@@ -1,0 +1,10 @@
+# Dispatch 062 — re-trigger FULL build for P0 arch-mkt twin (joint-discovery depth).
+# Picked up by twins-dispatch-daemon on DO droplet 192.241.140.181.
+
+slugs:
+  - arch-mkt-orquestrador-insights
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

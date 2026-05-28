@@ -1,0 +1,20 @@
+# Dispatch 041 — YouTube probe + first YT-dependent persona full mode.
+#
+# Canary 040 (guardiao-privacy) passou: pipeline texto-only end-to-end
+# validado (Firecrawl + Voyage + Anthropic). @fernanda atualizou
+# YTDLP_PROXY com Static Residential Webshare (UK IP 82.26.107.67).
+#
+# Esta persona é o melhor probe pra YouTube: 6 entrevistas YT (Marcello
+# Serpa AlmapBBDO x2, Fabio Fernandes F/Nazca, projeto Método Creativos,
+# W+K SP cases, M&M podcast Spotify). Se passar transcribe + build + eval,
+# proxy está saudável e disparo os 13 restantes em sequência.
+#
+# Se transcribe falhar nas YT URLs (proxy still blocking):
+# - Pipeline ainda gera twin de texto-only (Firecrawl OK)
+# - Decidimos: rotacionar pra próxima IP Webshare OU partir pra Cobalt
+
+slug: arch-mkt-cultura-brand-agency
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

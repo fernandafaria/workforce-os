@@ -1,0 +1,26 @@
+# Full-mode BATCH A RETRY — Ometto, Krigsner, Feffer.
+#
+# Dispatch 020 died in 17s at the preflight step: the hard-coded probe
+# video (cFvLFIM8roc) got "Sign in to confirm you're not a bot" from
+# yt-dlp, and captions probe was empty. The Webshare quickstart IP
+# (154.36.110.234) is a shared single IP and apparently got bot-flagged
+# against that specific video.
+#
+# Fix pushed in the same commit: preflight step is now advisory-only
+# (warning, not error). transcribe.py already has per-URL graceful
+# fallback (captions → yt-dlp+Whisper → skip), so a flaky probe should
+# not kill the whole run.
+#
+# Expected behavior: preflight warns, ingest continues per-source,
+# some YouTube URLs may fail (proxy variance) but text sources always
+# succeed, and the per-person eval still runs against whatever chunks
+# got ingested.
+
+slugs:
+  - cosan-ometto
+  - boticario-krigsner
+  - suzano-feffer
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

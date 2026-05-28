@@ -1,0 +1,30 @@
+# Dispatch dos 12 twins individuais Tier 1 CMOs BR.
+#
+# Specs em rag/twins/persons/<slug>.yaml (PR #664, mergeado).
+# authorization=authorized_personal — consent confirmado pela Fernanda
+# Faria. Origem do mapa: _meta/research/marketing-pros-br.md (v3, 102
+# CMOs ativos; estes 12 são o Tier 1 priorizado por visibilidade pública
+# + corpus de podcasts/entrevistas).
+#
+# Mode: dry-run. File-trigger só aceita dry-run (twins-run.yml linha 46);
+# para promover pra full, dispatchar manualmente via Actions tab depois
+# do dry-run validar cada spec (parse YAML, sources resolvíveis,
+# discovery de corpus base).
+
+slugs:
+  - daniela-cachich
+  - eduardo-tracanella
+  - juliana-cury
+  - alexia-duffles
+  - karla-felmanas
+  - andre-britto
+  - marcelo-bronze
+  - marcio-carvalho
+  - renata-altenfelder
+  - guilherme-bernardes
+  - tatiana-ponce
+  - cathyelle-schroeder
+
+mode: dry-run
+skip_transcribe: false
+skip_build_eval: false

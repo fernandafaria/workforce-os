@@ -1,0 +1,30 @@
+# FULL mode smoke test — Eduardo Tracanella (ex-CMO Itaú 27 anos).
+#
+# Primeiro twin individual de pessoa real autorizada (authorization=granted)
+# a passar pelo pipeline completo. Escolhido como smoke porque tem o maior
+# corpus público entre os 12 Tier 1: 27 anos de carreira no Itaú, founder
+# da al.in, palestras públicas, entrevistas Exame/M&M/Propmark/NeoFeed,
+# LinkedIn ativo. Mais provável de bater gate (corpus ≥3 sources, ≥2 types,
+# ≥10k tokens, holdout_cosine_p70 ≥ 0.75).
+#
+# Pré-requisitos validados:
+# - spec rag/twins/persons/eduardo-tracanella.yaml mergeado em main (PR #664)
+# - authorization=granted (válido per validador, PR #682)
+# - workflow twins-run.yml com diff-based dispatch (PR #681) → vai pegar
+#   este 044 via diff sobre lex
+# - proxy_utils.normalize_proxy_env aplicado (PR #687) → mesmo se secret
+#   YTDLP_PROXY estiver em formato Webshare-list, normaliza pra URL
+#
+# Custo estimado: $0.50-1 (Whisper transcribe se necessário + Anthropic
+# build + Voyage embeddings + Anthropic eval). Tempo: 15-30min.
+#
+# Se passar gate → PR seguinte com dispatch batch dos outros 11 Tier 1.
+# Se falhar → investigar (provável: bug residual de proxy ou source quality).
+
+slugs:
+  - eduardo-tracanella
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

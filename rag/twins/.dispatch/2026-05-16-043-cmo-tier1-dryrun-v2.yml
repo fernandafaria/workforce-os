@@ -1,0 +1,31 @@
+# Dispatch v2 dos 12 twins individuais Tier 1 CMOs BR.
+#
+# Tentativa anterior (042 em PR #681) executou corretamente o dispatch
+# mas falhou em verify_specs: 12 YAMLs usavam `authorization:
+# authorized_personal` (valor sugerido por CLAUDE.md) que NÃO está na
+# enum válida do validador `rag/twins/ingest_person.py:144`. Enum aceita:
+# {pending, granted, public_figure, denied, archetype_synthetic}.
+#
+# Esta PR corrige os 12 YAMLs pra `authorization: granted` (valor
+# canônico pra "consent obtido"). Dispatch 043 dispara workflow com
+# specs já corrigidos pra validar end-to-end em dry-run.
+#
+# Mode: dry-run (sem custo de API; sem hit no bug de proxy do FULL).
+
+slugs:
+  - daniela-cachich
+  - eduardo-tracanella
+  - juliana-cury
+  - alexia-duffles
+  - karla-felmanas
+  - andre-britto
+  - marcelo-bronze
+  - marcio-carvalho
+  - renata-altenfelder
+  - guilherme-bernardes
+  - tatiana-ponce
+  - cathyelle-schroeder
+
+mode: dry-run
+skip_transcribe: false
+skip_build_eval: false

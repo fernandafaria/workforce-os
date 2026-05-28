@@ -1,0 +1,31 @@
+# Lote B Tier 1 CMOs — FULL pipeline (12 slugs, serial on DO runner).
+#
+# Rationale: smoke test Eduardo Tracanella (PR #688) confirmou que a pipeline
+# roda end-to-end no DO runner com proxy_utils fix (PR #687) e gate eval/throttle
+# (PR #683). Twin foi construído como `status=draft` (gate falhou por corpus
+# token count após LinkedIn negar fetch). Resto dos 11 CMOs deve seguir o mesmo
+# padrão: twins criados em `draft`, gate failure por corpus thin é esperado e
+# será endereçado por `twins-discover-sources.yml` em PR subsequente.
+#
+# Cohort vem de rag/twins/marketing_discovery_manifest.py::CMO_TIER1.
+# Custo estimado: ~$6-12 (12 × $0.50-1 por twin).
+# Wall clock estimado: ~36 min (12 × ~3 min serial no `twins` runner).
+
+slugs:
+  - daniela-cachich
+  - eduardo-tracanella
+  - juliana-cury
+  - alexia-duffles
+  - karla-felmanas
+  - andre-britto
+  - marcelo-bronze
+  - marcio-carvalho
+  - renata-altenfelder
+  - guilherme-bernardes
+  - tatiana-ponce
+  - cathyelle-schroeder
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

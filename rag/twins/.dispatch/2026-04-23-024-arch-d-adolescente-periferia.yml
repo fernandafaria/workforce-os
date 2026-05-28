@@ -1,0 +1,14 @@
+# Archetype #24 — Adolescente, periferia, classe D
+#
+# Especificação para dispatch autônomo via GitHub Actions.
+# File-triggered: workflow `.github/workflows/twins-run.yml` executa
+# `python -m rag.twins.run_all --only arch-d-adolescente-periferia --mode full`.
+#
+# Corpus: 148 chunks já ingestados no DO runner (holdout: 29).
+# Esperado: p70 ≥ 0.72 para passar production gate.
+
+slug: arch-d-adolescente-periferia
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

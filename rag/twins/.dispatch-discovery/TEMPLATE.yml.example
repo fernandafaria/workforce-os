@@ -1,0 +1,14 @@
+# Copy to <ISO-date>-<seq>-<slug>.yml and fill in. Removing .example
+# extension is what triggers the workflow.
+
+company_id: 00000000-0000-0000-0000-000000000000
+user_id: 00000000-0000-0000-0000-000000000000
+
+slug: example-slug
+name: "Example Person"
+usernames:
+  - exampleuser
+wayback_domains: []
+enable_itunes: true
+enable_firecrawl_podcasts: true
+skip_maigret: false

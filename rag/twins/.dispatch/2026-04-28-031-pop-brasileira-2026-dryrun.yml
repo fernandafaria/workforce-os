@@ -1,0 +1,21 @@
+# Dispatch: dry-run validation of pop-brasileira-2026 reference corpus.
+#
+# This is the FIRST dispatch using `persons_dir` to point the workflow at
+# rag/twins/shared/ instead of the default rag/twins/persons/. The shared
+# corpus holds non-twin reference material (background context for archetype
+# interviews) — see rag/twins/shared/README.md.
+#
+# Why dry-run: validates url_sanity over the 41 sources (Quaest/AtlasIntel/
+# Datafolha/Ipsos-Ipec/IPEA/FGV-IBRE/IBGE/Cedeplar/Locomotiva/Paraná) without
+# spending on Whisper/Anthropic/Voyage. If any URL is malformed or channel-
+# level, url_sanity will surface it in the PR comment. Real ingestion (full
+# mode) is a follow-up dispatch once dry-run passes.
+#
+# Cost expectation: $0 (no network calls beyond GH Actions runner setup).
+
+slug: pop-brasileira-2026
+persons_dir: rag/twins/shared
+
+mode: dry-run
+# confirm_full_mode intentionally absent — dry-run is hard-forced anyway.
+skip_transcribe: false

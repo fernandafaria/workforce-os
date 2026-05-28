@@ -1,0 +1,31 @@
+# Dispatch dos 12 twins individuais Tier 1 CMOs BR (segunda tentativa).
+#
+# Tentativa 1 (dispatch 038 em PR #676) foi shadowed por dispatch 041 (arch-mkt
+# FULL) devido a lex-newest-globally selection no twins-run.yml. Esta PR
+# corrige a seleção pra usar `git diff before..after` (file added in this
+# push) — fix arquitetural pra dispatches paralelos.
+#
+# Specs em rag/twins/persons/<slug>.yaml (PR #664, mergeado).
+# authorization=authorized_personal — consent confirmado pela Fernanda Faria.
+# Origem do mapa: _meta/research/marketing-pros-br.md (v3, 102 CMOs ativos).
+#
+# Mode: dry-run. File-trigger só aceita dry-run sem confirm_full_mode=true
+# (twins-run.yml linha 209). Sem custo de API.
+
+slugs:
+  - daniela-cachich
+  - eduardo-tracanella
+  - juliana-cury
+  - alexia-duffles
+  - karla-felmanas
+  - andre-britto
+  - marcelo-bronze
+  - marcio-carvalho
+  - renata-altenfelder
+  - guilherme-bernardes
+  - tatiana-ponce
+  - cathyelle-schroeder
+
+mode: dry-run
+skip_transcribe: false
+skip_build_eval: false

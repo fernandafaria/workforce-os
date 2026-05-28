@@ -1,0 +1,27 @@
+# Full-mode HYBRID v2 (audio via Groq + text via Firecrawl) — Menin.
+#
+# Dispatch 018 was about to fail verify_secrets because it required
+# OPENAI_API_KEY for Whisper, but this repo uses GROQ_API_KEY
+# (whisper-large-v3, free tier, OpenAI-compatible endpoint). Fixed:
+#
+#   rag/twins/transcribe.py now detects GROQ_API_KEY first and points
+#   the OpenAI SDK at https://api.groq.com/openai/v1 with model
+#   whisper-large-v3. Falls back to OPENAI_API_KEY if only that is set.
+#
+#   twins-run.yml: verify_secrets accepts either GROQ or OPENAI for
+#   audio mode. GROQ_API_KEY passed through to the pipeline env.
+#
+# YouTube routing per URL:
+#   1. youtube-transcript-api via YTDLP_PROXY (residential)
+#      — cheap, no Whisper cost, works when video has captions.
+#   2. yt-dlp --proxy → audio.m4a → Groq Whisper via OpenAI SDK
+#      — fallback for video without captions.
+#
+# Expected impact on gate: adding 7 first-person interviews should
+# lift p70 from 0.728 → somewhere in 0.76-0.82 range, passing Hamel
+# gate and flipping status=canonical.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

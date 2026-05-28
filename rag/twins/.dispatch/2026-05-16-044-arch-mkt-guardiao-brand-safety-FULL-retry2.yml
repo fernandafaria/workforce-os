@@ -1,0 +1,22 @@
+# Dispatch 044 — retry 2 guardiao-brand-safety após @fernanda re-fix do secret.
+#
+# Dispatch 042 e 043 falharam pelo mesmo motivo: YTDLP_PROXY com
+# conteúdo bruto do arquivo Webshare (10 linhas) ao invés de URL única.
+# @fernanda confirmou ("Feito") que atualizou pra URL canônica.
+#
+# Esperado:
+# - Firecrawl: 18/18 fetched (sem "Failed to parse:" + multi-linha)
+# - yt-dlp probe: pode falhar com bot-detect dependendo do IP (persona
+#   não tem YouTube, então não bloqueia)
+# - ingest: ~150-200 chunks, ~30-95 holdout
+# - build + eval: twin + p70 ≥ 0.72
+#
+# Se este passar: disparo os 11 restantes (mistas + YouTube-pesadas)
+# em sequência sabendo que proxy + Firecrawl + Voyage + Anthropic estão
+# saudáveis.
+
+slug: arch-mkt-guardiao-brand-safety
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

@@ -1,0 +1,21 @@
+# Full-mode TEXT-ONLY v8 — Twin #1 (Rubens Menin / MRV).
+#
+# Dispatch 015 was another huge milestone:
+#   - Voyage (now paid tier) returned 200 OK on every call (no more 429s)
+#   - Ingest completed in 178s vs 234s in dispatch 013
+#   - Build succeeded: twin_id=956cc9d1-1c42-43f7-aec8-62423b5df15b
+#   - Eval hit a NEW wall: Anthropic org TPM rate limit (30k TPM for
+#     claude-opus-4-7) — we were burning through ~15k tokens per holdout
+#     iter (synthesize_question + bounded tool-use loop) too fast.
+#
+# Fix: throttle eval loop with 30s sleep between holdouts + reduce
+# default max_examples from 40 to 20. Worst case: 20 * 30s = 600s =
+# 10 min eval stage. Well within the 90min job timeout.
+#
+# Expected outcome: full pipeline completes, holdout cosine p70
+# computed, Hamel gate decision written.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

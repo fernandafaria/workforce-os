@@ -1,0 +1,33 @@
+# Full-mode HYBRID (audio + text) — Twin #1 (Rubens Menin / MRV).
+#
+# Dispatch 017 closed the loop end-to-end on text-only corpus:
+#   - 272 chunks / 54 holdout / 152k tokens
+#   - twin_id=112a0590-fe2c-42ec-843a-52051c69fad9 (draft)
+#   - p70 cosine = 0.728 → missed Hamel gate (0.75) by 0.022
+#
+# The gap is almost entirely corpus composition — text sources are
+# largely 3rd-person (Wikipedia, InfoMoney profile, Brazil Journal
+# articles ABOUT him). Interview/podcast chunks are 1st-person voice
+# that the twin should sound like.
+#
+# User just added YTDLP_PROXY (Webshare residential) so YouTube is
+# reachable. This dispatch turns the audio path back on:
+#   skip_transcribe=false
+#
+# Pipeline per YouTube URL:
+#   1. rag/twins/transcribe.py → youtube-transcript-api via proxy
+#      (fast, no Whisper cost) — writes _corpus/<slug>/*.md
+#   2. If captions unavailable → yt-dlp --proxy → audio.m4a → Whisper
+#   3. ingest_person.py picks up _corpus/*.md for YouTube URLs,
+#      Firecrawl for all open-text URLs, re-chunks, re-embeds.
+#   4. Re-build twin, re-eval. Expected: p70 ≥ 0.75, gate passes,
+#      twin flips status=canonical automatically.
+#
+# Cost estimate: $1-3 (Whisper for ~7 x 30min videos worst-case if
+# captions fail everywhere, plus ~$0.50 Opus re-build, ~$0.20 Voyage
+# re-embed). Should finish in ~25-30 min including eval throttle.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

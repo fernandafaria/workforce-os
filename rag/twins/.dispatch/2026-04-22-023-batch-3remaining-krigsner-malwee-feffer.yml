@@ -1,0 +1,29 @@
+# Full-mode BATCH 3 remaining — Krigsner, Malwee, Feffer.
+#
+# Dispatch 022 results: 4/7 patriarchs canonical (Menin + Ometto +
+# Lafer + Randon all passed p70 >= 0.75). Three remain:
+#
+#   boticario-krigsner: CRASHED at build with KeyError: 'company'.
+#     Opus tool-use output omitted the required `company` field. Fixed
+#     with defensive `.get()` fallback in build_twin.py.
+#
+#   malwee-weege: pipeline completed but p70=0.625 (corpus too thin,
+#     18 chunks / 4 holdouts). Added 3 extra text URLs: Exame, eCycle
+#     (ESG), FIESC.
+#
+#   suzano-feffer: pipeline completed but p70=0.629 (14 chunks / 4
+#     holdouts). Added 4 extra text URLs: Brazil Journal search,
+#     Exame, Suzano institutional, Wikipedia Família Feffer.
+#
+# Expected this batch: Krigsner builds cleanly (already had 32 chunks
+# in 022 — enough to pass if gate is achievable), Malwee + Feffer
+# corpus rises to 20-30 chunks → p70 should clear 0.75.
+
+slugs:
+  - boticario-krigsner
+  - malwee-weege
+  - suzano-feffer
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

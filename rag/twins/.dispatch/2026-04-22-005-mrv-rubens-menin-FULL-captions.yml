@@ -1,0 +1,15 @@
+# Full-mode run v3 — Twin #1 (Rubens Menin / MRV) on self-hosted droplet.
+#
+# New pipeline order:
+#   1. YouTube captions (youtube-transcript-api) — different endpoint than
+#      audio, works from cloud IPs. Fast, free.
+#   2. yt-dlp + Whisper fallback — only if captions unavailable AND yt-dlp
+#      isn't blocked. Nuance capture.
+#   3. Text sources (institutional URLs, RI pages) via Firecrawl in ingest.
+#
+# Expected: 7 YT URLs → captions hit ~5-7 of them; text sources via Firecrawl;
+# build + eval; acceptance summary.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true

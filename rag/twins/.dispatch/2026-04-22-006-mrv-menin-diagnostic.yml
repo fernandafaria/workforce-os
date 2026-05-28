@@ -1,0 +1,7 @@
+# Full-mode run v4 — com step de diagnostic-to-PR-comment.
+# Se falhar, log vai aparecer como comentário em PR #164 — eu leio via
+# mcp__github__pull_request_read e itero sem precisar acessar a droplet.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true

@@ -1,0 +1,13 @@
+# Lote A P0 — marketing buyer twins FULL pipeline (3 slugs).
+# Process on DO runner via twins-dispatch-daemon after merge to main.
+# Generated for SyntheticPerson Insights/Lab discovery program.
+
+slugs:
+  - arch-mkt-orquestrador-insights
+  - arch-mkt-cultura-cmo-legado
+  - arch-mkt-fronteira-ai-martech
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

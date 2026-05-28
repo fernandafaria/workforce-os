@@ -1,0 +1,31 @@
+# Build 20 exec-ai personas on twins runner (DeepSeek V4 Pro).
+# Requires corpus from prior ingest on runner OR will re-ingest per slug.
+# GitHub secret: DEEPSEEK_API_KEY (same key as Cursor Cloud Agent).
+
+slugs:
+  - arch-exec-ai-travada-chatgpt-sp-cap-listada
+  - arch-exec-ai-fomo-demo-comprador-sp-cap-listada
+  - arch-exec-ai-cfo-cetico-roi-sp-cap-listada
+  - arch-exec-ai-ceo-familia-legado-sp-cap-listada
+  - arch-exec-ai-cto-visionario-frustrado-sp-cap-listada
+  - arch-exec-ai-chro-upskilling-generico-sp-cap-listada
+  - arch-exec-ai-board-pergunta-estrategia-sp-cap-listada
+  - arch-exec-ai-cmo-delega-junior-sp-cap-listada
+  - arch-exec-ai-coo-medo-automacao-sp-cap-listada
+  - arch-exec-ai-founder-scaleup-impostor-sp-cap-listada
+  - arch-exec-ai-multinacional-glocal-sp-cap-listada
+  - arch-exec-ai-estatal-guardiao-sp-cap-listada
+  - arch-exec-ai-early-adopter-irritado-sp-cap-listada
+  - arch-exec-ai-conselheiro-independente-sp-cap-listada
+  - arch-exec-ai-juridico-bloqueador-sp-cap-listada
+  - arch-exec-ai-head-inovacao-sem-budget-sp-cap-listada
+  - arch-exec-ai-vp-vendas-crm-ia-sp-cap-listada
+  - arch-exec-ai-supply-chain-piloto-sp-cap-listada
+  - arch-exec-ai-rh-talent-ai-sp-cap-listada
+  - arch-exec-ai-presidente-associacao-sp-cap-listada
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: true
+skip_build_eval: false
+build_llm_provider: deepseek

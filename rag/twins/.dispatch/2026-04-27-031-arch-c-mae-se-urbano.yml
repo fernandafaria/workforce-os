@@ -1,0 +1,34 @@
+# Dispatch — arch-c-mae-se-urbano build pra popular twins.db do DO runner.
+#
+# Por que agora: a entrevista PoC (twins-interview) precisa do twin
+# resolvido em twins.db. Diagnóstico do PR #263 mostrou que o DB foi
+# wipado entre o build histórico (PR #164/#202) e o uso atual — root
+# cause: actions/checkout@v4 default `clean: true` corre `git clean -ffdx`
+# e apaga arquivos gitignored entre runs.
+#
+# Fix arquitetural: dois workflows agora usam `clean: false`. A partir
+# deste dispatch:
+#   1. twins-run constrói arch-c-mae-se-urbano + grava no twins.db do runner
+#   2. twins-interview (próximo push em rag/twins/.interview/*.yml) lê
+#      o DB persistente e roda entrevista — quantas vezes quiser, $0.50
+#      por iteração de tópico/prompt.
+#
+# Dados do archetype:
+#   - p70=0.744 (validado em PR #164/#202; corpus 14k+ tokens, 11+ sources)
+#   - cluster ~25M pessoas BR (mãe classe C SE urbano, filhos 10-17)
+#   - notes IBGE-anchored, sources etnografia + jornalismo + IBGE/PNAD
+#
+# skip_transcribe: true → reusa _corpus/<slug>/*.md cacheado. Se o cache
+# tiver evaporado (clean: true wipa-o também antes desta correção), o
+# build falha com mensagem clara → re-dispatch com skip_transcribe: false
+# pra re-fetch via Webshare proxy.
+#
+# Custo esperado: ~$5 Anthropic + Voyage embeddings.
+# Gate Hamel Layer-1: p70 ≥ 0.72 (limiar archetype_synthetic).
+# Timeout: 90min.
+
+slug: arch-c-mae-se-urbano
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

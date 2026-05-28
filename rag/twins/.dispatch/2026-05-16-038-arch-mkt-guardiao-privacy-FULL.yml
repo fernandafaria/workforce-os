@@ -1,0 +1,17 @@
+# Canary full-mode: arch-mkt-guardiao-privacy.
+#
+# Por que canary primeiro: dry-run anterior falhou no schema (type=paper)
+# e não chegou a exercitar Firecrawl/Voyage/Anthropic/Whisper. Persona
+# escolhida tem corpus enxuto (18 sources), zero YouTube/podcast, e
+# domina URLs estáveis (ANPD gov.br, IAPP, OneTrust, livro Bioni PDF).
+# Menor superfície de erro pra validar pipeline antes de gastar 14x.
+#
+# Se passar (p70 ≥ gate, transcribe attempted=0/0 esperado pois não tem
+# YouTube, embedding/ingest sem erros): disparo os 14 restantes em
+# sequência.
+
+slug: arch-mkt-guardiao-privacy
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

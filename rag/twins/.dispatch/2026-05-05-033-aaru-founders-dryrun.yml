@@ -1,0 +1,31 @@
+# Twins dispatch — Aaru founders (3 operators, all public figures)
+#
+# Parte da pesquisa "Aaru company history report" (PR #350).
+# Specs criados em rag/twins/persons/{cam-fink,ned-koh,john-kessler}.yaml
+# com authorization=public_figure e twin_kind=operator.
+#
+# Estratégia: dry-run primeiro para validar URLs + parsing do spec.
+# Sources são todos PÚBLICOS e VERIFICADOS via WebSearch (regra-mãe ZERO
+# dados inventados):
+#   - CNBC Squawk Box 20/03/2026 (1RrPDLUcVqw) — todos os 3 founders
+#   - CNBC Mad Money Cramer 09/04/2026 — Cam + Ned
+#   - Squawk Pod audio 20/03/2026 (WJLQLc02o8w) — todos os 3
+#   - Yahoo Finance / Josh Lipton 19/03/2026 — Ned solo
+#   - Semafor (Reed Albergotti) 06/11/2024 — Cam quotes
+#   - SuperAI Singapore keynote 2026 — Ned
+#   - WSJ profile (Suzanne Vranica) — Cam history
+#   - EY Wealth Management study (07/10/2025) — validação técnica de Kessler
+#   - 36kr, Woman Magazine, La Voce di NY, GLN-7.5 — perfis Kessler
+#   - LinkedIn + X de cada founder
+#   - aaru.com/about (filosofia transacionalista, primeira pessoa)
+#
+# Após dry-run validar URLs, rodar FULL mode em dispatch separado.
+
+slugs:
+  - cam-fink
+  - ned-koh
+  - john-kessler
+
+mode: dry-run
+confirm_full_mode: false
+skip_transcribe: false

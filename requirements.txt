@@ -30,3 +30,8 @@ pyyaml>=6.0
 
 # Rate limiting (Upstash Redis-compatible)
 slowapi>=0.1.9
+
+# Twins pipeline (ingest, transcribe, embed)
+firecrawl-py>=1.5.0,<2.0.0  # URL scraping para ingest_person
+openai-whisper>=20240930    # Transcrição de áudio (modelo turbo)
+numpy>=1.24.0               # dependência do whisper

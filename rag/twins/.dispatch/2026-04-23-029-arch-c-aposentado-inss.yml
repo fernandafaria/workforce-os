@@ -1,0 +1,14 @@
+# Archetype #29 — Aposentado INSS, classe C
+#
+# Especificação para dispatch autônomo via GitHub Actions.
+# File-triggered: workflow `.github/workflows/twins-run.yml` executa
+# `python -m rag.twins.run_all --only arch-c-aposentado-inss --mode full`.
+#
+# Corpus: 393 chunks já ingestados no DO runner (holdout: 78).
+# Esperado: p70 ≥ 0.72 para passar production gate.
+
+slug: arch-c-aposentado-inss
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

@@ -1,0 +1,12 @@
+# Retry canary 2: arch-mkt-guardiao-privacy full mode.
+#
+# Dispatch 039 chegou até Anthropic build mas falhou com 401 (API key
+# inválida). @fernanda confirmou key atualizada. Re-dispatch pra
+# validar pipeline end-to-end (ingest 196 chunks já funcionou no 039,
+# se Anthropic build der ok daqui sai twin_id + passed_gate).
+
+slug: arch-mkt-guardiao-privacy
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

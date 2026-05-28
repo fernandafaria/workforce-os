@@ -1,0 +1,19 @@
+# Full-mode TEXT-ONLY v7 — Twin #1 (Rubens Menin / MRV).
+#
+# Dispatch 014 produced the first-ever twin: twin_id=e5001f66-5e89-...
+# status=draft, corpus 274 chunks / 164k tokens. Build succeeded.
+# Only eval failed — same temperature deprecation in eval_twin.py.
+#
+# Applied the same `_supports_temperature(model)` conditional to both
+# call sites in eval_twin.py (_synthesize_question and _ask_twin).
+#
+# Expected outcome: ingest ~3 min (Voyage 429s persist until user adds
+# payment method), build succeeds, eval now runs, holdout cosine
+# computed, Hamel p70 gate decision written to run_all_report.json.
+# If p70 >= 0.75: twin promoted canonical. If not: stays draft with
+# clear reason.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

@@ -1,0 +1,23 @@
+# Dispatch 042 — full mode arch-mkt-guardiao-brand-safety.
+#
+# Próxima persona da sequência após canary 040 (guardiao-privacy passou).
+# Dispatch 041 (brand-agency) ainda sem visibilidade do diagnostic
+# porque a PR foi mergeada antes do workflow completar — workflow só
+# posta em PR `state=open`.
+#
+# Esta persona é segura pra continuar sem depender de proxy:
+# - 17 sources, todas Firecrawl-friendly (WFA/GARM, ANA, 4A's, IAB
+#   Brasil, M&M ProXXIma, AdExchanger, Marketing Brew, AdWeek, MRC PDF,
+#   livro Zuboff)
+# - 0 URLs YouTube/podcast — não exercita o proxy YTDLP
+# - Boa pra validar Firecrawl + Voyage + Anthropic novamente em
+#   contexto diferente de guardiao-privacy
+#
+# IMPORTANTE: não mergear a PR até o diagnostic do github-actions[bot]
+# postar (workflow checa state=open pra encontrar a PR).
+
+slug: arch-mkt-guardiao-brand-safety
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

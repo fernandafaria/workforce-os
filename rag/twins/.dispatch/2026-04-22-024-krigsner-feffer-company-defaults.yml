@@ -1,0 +1,34 @@
+# Full-mode last 2 — Krigsner + Feffer.
+#
+# Status after dispatch 023: 5/7 canonical (Menin + Ometto + Lafer +
+# Randon + Malwee). Malwee finally crossed gate at p70=0.858 after
+# we added the 3 extra text URLs.
+#
+# Krigsner + Feffer both crashed at build step with:
+#   ValidationError: 6 validation errors for CompanyContext
+#     sector: Field required [missing]
+#     sub_sector: Field required [missing]
+#     ... (revenue_range, employees_range, region, digital_maturity)
+#
+# Root cause: my earlier defensive fix `.get("company") or {}` prevents
+# the KeyError but then CompanyContext's strict required-field schema
+# fails validation on empty dict. Both Opus extractions for these two
+# persons apparently omitted the company subtree entirely.
+#
+# Clean fix applied in rag/twins/schema.py: CompanyContext fields now
+# have sensible defaults (sector="outro", revenue_range="200M+",
+# employees_range="1000+", digital_maturity="basic_erp", region and
+# sub_sector empty string). The production gate already flags thin
+# company data, so no signal lost — just no more crashes.
+#
+# Expected: both build cleanly, eval runs on existing corpus, gate
+# likely passes for both (Feffer had 21 chunks / 4 holdouts last time,
+# Krigsner had 32 / 6 — both above Malwee's 23 that passed).
+
+slugs:
+  - boticario-krigsner
+  - suzano-feffer
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

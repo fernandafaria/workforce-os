@@ -1,0 +1,16 @@
+# TEMPLATE — dispatch single archetype.
+#
+# Copy to `YYYY-MM-DD-NNN-<slug>.yml` (date + monotonic 3-digit index),
+# adjust `slug`, commit + push. GH Actions fires automatically via the
+# `push → paths: rag/twins/.dispatch/*.yml` trigger.
+#
+# IMPORTANT: run ONE archetype per dispatch. Batches > 2 blow the 90min
+# job timeout when corpus is > 300 chunks (see BRAZILIAN_ARCHETYPES.md
+# §"Lições aprendidas").
+
+slug: arch-<slug-here>   # e.g. arch-c-aposentado-inss
+
+mode: full               # dry-run | full
+confirm_full_mode: true  # required for full mode (costs money)
+skip_transcribe: false   # false = fetch YouTube via proxy; true = reuse _corpus/*.md
+# skip_build_eval: false # optional, true = stop after ingest (no Anthropic/Voyage cost)

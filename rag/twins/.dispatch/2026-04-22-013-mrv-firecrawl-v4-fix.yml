@@ -1,0 +1,21 @@
+# Full-mode TEXT-ONLY v5 — Twin #1 (Rubens Menin / MRV).
+#
+# Dispatch 012 revealed the ACTUAL blocker: firecrawl-py 4.22.3 renamed
+# the class to `Firecrawl` (was `FirecrawlApp`) and the method to
+# `scrape(...)` (was `scrape_url(...)`). All 20 URL fetches failed with
+# `'Firecrawl' object has no attribute 'scrape_url'` → 0 chunks ingested
+# → build refused with "No corpus chunks for person_id=mrv-rubens-menin".
+#
+# Previous dispatches 003-011 had been hitting the same error but we
+# couldn't see it because the Run twins pipeline step didn't tee its log.
+#
+# This dispatch runs against fixed ingest_person.py with dual-API
+# support (v3 and v4). Expected: 12 text URLs fetch (Wikipedia, InfoMoney,
+# Brazil Journal, Seu Dinheiro), 7 YouTube URLs fail (YouTube has no
+# text content for Firecrawl to scrape), 2 missing local files fail.
+# 12 successful sources should be enough corpus for Hamel gate.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

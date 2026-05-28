@@ -1,0 +1,9 @@
+# Lote B pilot — FULL corpus before batch joint-discovery (CMO Tier-1).
+# Pick up by twins-dispatch-daemon on febrain-twins-runner after merge to main.
+
+slug: alexia-duffles
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

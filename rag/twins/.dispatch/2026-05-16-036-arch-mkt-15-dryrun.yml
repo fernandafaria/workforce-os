@@ -1,0 +1,40 @@
+# Dry-run dos 15 arquétipos profissionais de marketing/insights CPG-varejo.
+#
+# Personas criadas em PR #656 (merged). Esta dispatch valida estrutura,
+# acessibilidade de URLs e cobertura de corpus ANTES de qualquer full mode.
+# Zero custo de API. Output: run_all_report.json artifact.
+#
+# Se passar: próximo passo é full-mode 1-a-1 (per template guardrail
+# de 90min job timeout), só após confirmação da @fernanda sobre custo.
+
+slugs:
+  # Cluster A — Arquitetos de Evidência
+  - arch-mkt-evidencia-cpg-global
+  - arch-mkt-evidencia-varejo
+  - arch-mkt-evidencia-consultor
+
+  # Cluster B — Operadores de Performance Comercial
+  - arch-mkt-performance-trade
+  - arch-mkt-performance-digital
+  - arch-mkt-performance-rgm
+
+  # Cluster C — Curadores de Significado Cultural
+  - arch-mkt-cultura-brand-agency
+  - arch-mkt-cultura-cmo-legado
+  - arch-mkt-cultura-antropologo
+
+  # Cluster D — Orquestradores Híbridos
+  - arch-mkt-orquestrador-insights
+  - arch-mkt-orquestrador-consultor
+
+  # Cluster E — Guardiões de Governança
+  - arch-mkt-guardiao-brand-safety
+  - arch-mkt-guardiao-privacy
+
+  # Cluster F — Exploradores de Fronteira
+  - arch-mkt-fronteira-foresight
+  - arch-mkt-fronteira-ai-martech
+
+mode: dry-run
+skip_transcribe: false
+skip_build_eval: false

@@ -1,0 +1,30 @@
+# Twins dispatch — Aaru founders FULL MODE rerun (eval visibility)
+#
+# Re-trigger after PR #350 was merged with twins-run still in_progress.
+# A run completed success (25400872792, 21min) but the diagnostic
+# comment never posted — likely the post step's `if: github.event.pull_request`
+# condition skipped because the PR was closed/merged during the run.
+#
+# Re-running on a fresh open PR so the bot posts eval scores cleanly:
+#   - holdout_cosine_p70 per slug
+#   - passed_gate (true/false vs 0.75 threshold for public_figure)
+#   - twin_id (UUID) for chat_with_twin.py later
+#
+# Specs unchanged from previous run:
+#   - cam-fink:     10 sources, ~52k tokens corpus
+#   - ned-koh:      12 sources, ~34k tokens
+#   - john-kessler: 12 sources, ~43k tokens
+# All > 10k threshold + ≥2 source types.
+#
+# Plus this branch ships the maigret 0.6+ JSON parser fix (filter_maigret
+# accepting flat schema). discover_sources.py now correctly extracts
+# Twitter/YouTube hits — relevant for future twins, not this run.
+
+slugs:
+  - cam-fink
+  - ned-koh
+  - john-kessler
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

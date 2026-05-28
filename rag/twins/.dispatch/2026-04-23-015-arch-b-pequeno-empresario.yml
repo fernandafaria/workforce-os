@@ -1,0 +1,14 @@
+# Archetype #15 — Pequeno empresário, classe B, 45-60, sucessão pendente
+#
+# Especificação para dispatch autônomo via GitHub Actions.
+# File-triggered: workflow `.github/workflows/twins-run.yml` executa
+# `python -m rag.twins.run_all --only arch-b-pequeno-empresario --mode full`.
+#
+# Corpus: 61 chunks já ingestados no DO runner (holdout: 13).
+# Esperado: p70 ≥ 0.72 para passar production gate.
+
+slug: arch-b-pequeno-empresario
+mode: full
+confirm_full_mode: true
+skip_transcribe: false
+skip_build_eval: false

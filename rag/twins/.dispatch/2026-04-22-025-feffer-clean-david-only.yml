@@ -1,0 +1,23 @@
+# Full-mode LAST ONE — David Feffer (Suzano), corpus hygiene pass.
+#
+# Status: 6/7 canonical after dispatch 024 (Krigsner p70=0.825 cleared
+# the gate). Only suzano-feffer remains below threshold at p70=0.618.
+#
+# Root cause identified in the YAML: one of the three YouTube
+# interviews was actually *Daniel* Feffer, David's brother — different
+# person, different voice, different archetype. Mixing both brothers
+# in a single "David Feffer" twin polluted the linguistic profile,
+# which is exactly why the holdout cosine eval had 0.377/0.553/0.609/
+# 0.693 — inconsistent because the twin is confused about whose voice
+# to mimic.
+#
+# Removed the misattributed video from the spec. Remaining corpus:
+#   - 2 YouTube URLs (both genuine David Feffer)
+#   - 9 text URLs (Wikipedia + InfoMoney + Suzano RI + extras)
+# Expected: 15-18 chunks, 3-4 holdouts — same volume Malwee passed
+# with (p70=0.858), and with a coherent voice profile.
+
+slug: suzano-feffer
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

@@ -1,0 +1,20 @@
+# Retry canary: arch-mkt-guardiao-privacy full mode.
+#
+# Dispatch 038 falhou com "Payment Required" da Firecrawl (créditos
+# esgotados) em todas as 20 URLs. @fernanda confirmou recarga.
+#
+# Mesmo target — guardiao-privacy é o melhor proof do Firecrawl em
+# isolamento (zero YouTube, URLs estáveis). Se passar agora:
+# (a) Firecrawl está restaurada, posso disparar os 14 restantes;
+# (b) MAS atenção: yt-dlp também falhou bot-detection ("Sign in to
+#     confirm you're not a bot"). Personas que dependem de YouTube
+#     (cultura-brand-agency, cultura-cmo-legado, performance-digital,
+#     fronteira-ai-martech) ainda vão falhar transcribe a menos que
+#     YTDLP_PROXY (Webshare) esteja saudável. Vou flagrar isso após
+#     este canary passar antes de avançar pros next 14.
+
+slug: arch-mkt-guardiao-privacy
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

@@ -1,0 +1,18 @@
+# Full-mode TEXT-ONLY v9 — Twin #1 (Rubens Menin / MRV).
+#
+# Dispatch 016 revealed the actual root cause: the BUILD step consumes
+# ~30k input tokens (full corpus sent for structured extraction), which
+# saturates the Anthropic 30k TPM ceiling. Eval's first call
+# immediately after build gets a 429 before any throttle can kick in.
+# The between-iteration throttle only fires on iter 2+.
+#
+# Fix: cooldown 65s AFTER build + BEFORE eval starts, then keep the
+# 30s between-iter throttle. Total added latency: 65 + (20-1)*30 =
+# ~10.8 min extra. Job timeout 90min still gives plenty of headroom.
+#
+# Expected: full pipeline, holdout cosine p70, Hamel gate decision.
+
+slug: mrv-rubens-menin
+mode: full
+confirm_full_mode: true
+skip_transcribe: true

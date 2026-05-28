@@ -1,0 +1,317 @@
+# Corpus compartilhado — Contexto situacional da população brasileira (2026)
+#
+# NÃO é um twin / archetype. É um corpus de REFERÊNCIA consultado durante
+# entrevistas com arquétipos populacionais (rag/twins/persons/arch-*.yaml)
+# pra ancorar interviewer e archetype no Brasil-real de 2026: números
+# demográficos, tendências, mood público, calcificação política, religião,
+# envelhecimento, classes populares.
+#
+# Uso esperado:
+#   1. Pipeline normal indexa este spec → SQLite chunks (mesmo formato que archetype)
+#   2. Briefing sintetizado em populacao-brasileira-2026-briefing.md
+#   3. interview_archetype.py injeta briefing como "contexto situacional"
+#      no system prompt do interviewer + archetype (background, NÃO
+#      vivência pessoal — o archetype usa pra contextualizar, não pra
+#      afirmar como sua experiência)
+#
+# Janela: ~ out/2025 a abr/2026 (algumas fontes ligeiramente fora marcadas
+# em comentário). Todas as URLs vieram de WebSearch real (regra ZERO dados
+# inventados). YouTube IDs precisam de validação na pipeline (DO runner +
+# Webshare proxy) — sandbox Claude não fetcha YouTube.
+
+id: pop-brasileira-2026
+name_public: "Contexto situacional — população brasileira 2026"
+archetype_label: "Brasil 2026: demografia, opinião, comportamento, polarização (corpus de referência)"
+authorization: archetype_synthetic
+notes: >
+  Corpus de pano-de-fundo para entrevistas com arquétipos populacionais.
+  Reúne pesquisas e entrevistas com institutos (Quaest, AtlasIntel,
+  Datafolha, Ipsos-Ipec, IPEA, FGV IBRE, IBGE) + demógrafos (Camarano,
+  Diniz Alves) cobrindo: envelhecimento, transição religiosa, calcificação
+  política, endividamento, otimismo/pessimismo, renda, classes C-D-E,
+  desigualdade, mercado de trabalho. Não modela uma pessoa — modela um
+  contexto. Por isso fica em rag/twins/shared/ e não em persons/.
+
+sources:
+  # =========================================================================
+  # Quaest — Felipe Nunes — livro "Brasil no Espelho" (~10k entrevistas em
+  # 340 municípios, 27 estados). Achados: 11 dimensões — religiosidade,
+  # família, identidade nacional, honestidade, meritocracia, discriminação,
+  # sexualidade, insegurança, confiança, comportamento social, ideologia.
+  # Quote-chave: 71% considera homossexualidade injustificável.
+  # Eleitorado calcificado (~90%) entre lulismo/bolsonarismo.
+  # =========================================================================
+  - url: https://www.youtube.com/watch?v=f1YCIm9WJUg
+    title: "Canal Livre Band — Felipe Nunes: Brasil no Espelho, valores e cenário 2026"
+    type: interview
+    date: 2025-12-22
+    first_person: false
+  - url: https://www.youtube.com/watch?v=JdGLCPZdyf8
+    title: "PodPeople #276 — Felipe Nunes: popularidade, dados e polarização"
+    type: interview
+    date: 2025-12-16
+    first_person: false
+  - url: https://www.youtube.com/watch?v=m3fbNnbyc0U
+    title: "Matinal Jornalismo — 'Brasil no espelho': pesquisa que revelou quem somos"
+    type: interview
+    date: 2025-12-22
+    first_person: false
+  - url: https://www.youtube.com/watch?v=KWw9GPkISbo
+    title: "Jornal da Globo — O que move o brasileiro? Diretor da Quaest detalha valores"
+    type: interview
+    date: 2025-12-15
+    first_person: false
+  - url: https://www.youtube.com/watch?v=LsK_5Bsp8kA
+    title: "CNN 360º — Felipe Nunes: pesquisa Quaest sobre eleição 2026 revela cansaço dos polos"
+    type: interview
+    date: 2026-01-15
+    first_person: false
+  - url: https://www.youtube.com/watch?v=maR4KMDlBy0
+    title: "PodQuaest — Pesquisa Genial/Quaest de intenção de voto março 2026"
+    type: interview
+    date: 2026-03-15
+    first_person: false
+  - url: https://www.seudinheiro.com/2026/lifestyle/como-pensam-os-brasileiros-novo-livro-de-felipe-nunes-reflete-valores-e-contradicoes-de-um-brasil-no-espelho-edvl/
+    title: "Seu Dinheiro — Como pensam os brasileiros (Brasil no Espelho)"
+    type: article
+    date: 2026-01-24
+    first_person: false
+  - url: https://www.moneytimes.com.br/entrevista-felipe-nunes-quaest-gaep/
+    title: "Money Times — Eleitorado 'calcificado' entre lulismo e bolsonarismo (Felipe Nunes)"
+    type: interview
+    date: 2026-04-16
+    first_person: false
+  # [fora-da-janela jun/2025 — incluído por densidade do conteúdo]
+  - url: https://www.youtube.com/watch?v=bEBsAtLZqQw
+    title: "Roda Viva (TV Cultura) — Felipe Nunes, diretor da Quaest"
+    type: interview
+    date: 2025-06-16
+    first_person: false
+
+  # =========================================================================
+  # AtlasIntel — Andrei Roman — disputa por 10% do eleitorado, erosão do
+  # "bônus Nordeste", corrupção volta como problema #1.
+  # =========================================================================
+  - url: https://www.youtube.com/watch?v=d7vtceER-Hk
+    title: "IstoÉ Entrevista — Andrei Roman, CEO Atlas Intel"
+    type: interview
+    date: 2026-03-08
+    first_person: false
+  - url: https://www.youtube.com/watch?v=hSL0nvwEd44
+    title: "Os Três Poderes — Corrupção pode decidir eleição 2026 (AtlasIntel)"
+    type: interview
+    date: 2026-01-02
+    first_person: false
+  - url: https://www.youtube.com/watch?v=iaKm6QRrYzg
+    title: "CNN Sábado — Movimento de fortalecimento de Lula e Bolsonaro (AtlasIntel)"
+    type: interview
+    date: 2025-11-15
+    first_person: false
+  - url: https://exame.com/brasil/disputa-de-2026-sera-por-10-do-eleitorado-desinteressado-que-busca-pelo-novo-diz-ceo-da-atlasintel/
+    title: "Exame — Disputa de 2026 será por 10% do eleitorado desinteressado (Roman)"
+    type: interview
+    date: 2025-10-13
+    first_person: false
+
+  # =========================================================================
+  # Datafolha — pesquisas de opinião dez/2025 e abr/2026.
+  # Achado: 69% dos brasileiros esperam melhora pessoal em 2026; 60%
+  # esperam melhora do país. Mulheres (74%), nordestinos (75%) e baixa
+  # escolaridade lideram otimismo.
+  # =========================================================================
+  - url: https://www.cnnbrasil.com.br/nacional/brasil/datafolha-69-dos-brasileiros-esperam-melhora-na-vida-pessoal-em-2026/
+    title: "CNN Brasil — Datafolha: 69% esperam melhora pessoal em 2026"
+    type: article
+    date: 2025-12-28
+    first_person: false
+  - url: https://www.brasildefato.com.br/2025/12/28/otimismo-69-dos-brasileiros-acredita-que-2026-sera-melhor-diz-datafolha/
+    title: "Brasil de Fato — Otimismo: 69% acreditam que 2026 será melhor"
+    type: article
+    date: 2025-12-28
+    first_person: false
+  - url: https://www.gazetadopovo.com.br/eleicoes/2026/pesquisa-eleitoral-2026/datafolha-presidente-abril-2026/
+    title: "Gazeta do Povo — Datafolha intenção de voto presidente abril 2026"
+    type: article
+    date: 2026-04-10
+    first_person: false
+
+  # =========================================================================
+  # Ipsos-Ipec — Márcia Cavallari — cenários eleitorais 2026.
+  # Lula com base 38% consistente; lados direitistas próximos entre si.
+  # =========================================================================
+  - url: https://www.ipsos.com/pt-br/lula-lidera-hoje-todos-os-cenarios-testados-para-eleicoes-de-2026
+    title: "Ipsos — Lula lidera todos cenários testados para 2026 (release)"
+    type: release
+    date: 2025-12-10
+    first_person: false
+  - url: https://www.cartacapital.com.br/politica/pesquisa-ipsos-ipec-testa-lula-contra-flavio-michelle-e-tarcisio-veja-os-resultados/
+    title: "CartaCapital — Pesquisa Ipsos-Ipec testa Lula vs. Bolsonaros e Tarcísio"
+    type: article
+    date: 2025-12-10
+    first_person: false
+
+  # =========================================================================
+  # Paraná Pesquisas — Murillo Hidalgo — análises sobre eleitorado de
+  # direita e definição de voto.
+  # =========================================================================
+  - url: https://www.youtube.com/watch?v=J56rUVPF_SQ
+    title: "Entrevista com D'Avila — Pres. Paraná Pesquisas crava futuro da direita em 2026"
+    type: interview
+    date: 2026-02-19
+    first_person: false
+  - url: https://www.youtube.com/watch?v=zad9RZI8zPQ
+    title: "Entrevista com D'Avila — O que define o voto do eleitor (Hidalgo)"
+    type: interview
+    date: 2026-01-15
+    first_person: false
+  - url: https://www.youtube.com/watch?v=I4-fP4G78MM
+    title: "Entrevista com D'Avila — Lula tem chance de reeleição? (Hidalgo)"
+    type: interview
+    date: 2026-03-10
+    first_person: false
+
+  # =========================================================================
+  # IPEA — pobreza, desigualdade, renda. Estudo de Pedro Souza e Marcos
+  # Hecksher: pobreza/desigualdade no menor nível em 30 anos. Renda per
+  # capita R$ 2.069 em 2024. Gini caiu ~18% em três décadas.
+  # =========================================================================
+  - url: https://www.ipea.gov.br/portal/categorias/45-todas-as-noticias/noticias/16170-brasil-registrou-em-2024-recorde-de-renda-e-menor-nivel-de-pobreza-e-desigualdade
+    title: "IPEA — Brasil 2024: recorde de renda e menor pobreza/desigualdade (Souza, Hecksher)"
+    type: release
+    date: 2025-11-28
+    first_person: false
+  - url: https://www.camara.leg.br/radio/programas/1228307-nivel-de-pobreza-e-desigualdade-chega-a-menor-nivel-em-tres-decadas-revela-estudo-do-ipea/
+    title: "Rádio Câmara — Pobreza/desigualdade no menor nível em 3 décadas (estudo IPEA)"
+    type: interview
+    date: 2025-12-01
+    first_person: false
+  - url: https://www.ipea.gov.br/portal/categorias/45-todas-as-noticias/noticias/16232-ipea-em-2025-dados-que-contam-historias-transformam-politicas-e-revelam-o-brasil
+    title: "IPEA — Balanço 2025: dados que contam histórias e revelam o Brasil"
+    type: release
+    date: 2025-12-20
+    first_person: false
+
+  # =========================================================================
+  # IPEA + Fiocruz — Ana Amélia Camarano — envelhecimento populacional.
+  # Quote: "Estamos ameaçando o sistema de solidariedade entre gerações".
+  # 35,5M idosos em 2025; até 2050, 2,3M precisarão de cuidadores
+  # remunerados. 2/3 dos idosos dependem exclusivamente do SUS.
+  # =========================================================================
+  - url: https://www.ipea.gov.br/portal/categorias/45-todas-as-noticias/noticias/16198-seminario-do-ipea-e-da-fiocruz-debate-envelhecimento-populacional-e-os-desafios-do-financiamento-da-saude
+    title: "IPEA — Seminário Ipea/Fiocruz: envelhecimento e financiamento da saúde (Camarano)"
+    type: interview
+    date: 2025-12-04
+    first_person: false
+  # [fora-da-janela 2020 — clássico, mantido pelo peso do dado: 34% dos
+  # domicílios dependem de 70% da renda dos idosos]
+  - url: https://www.ihu.unisinos.br/categorias/159-entrevistas/599662-34-dos-domicilios-brasileiros-dependem-de-70-da-renda-dos-idosos-entrevista-especial-com-ana-amelia-camarano
+    title: "IHU Unisinos — 34% dos domicílios dependem de 70% renda idosos (Camarano)"
+    type: interview
+    date: 2020-01-15
+    first_person: false
+
+  # =========================================================================
+  # FGV IBRE — mercado de trabalho, demografia, satisfação no trabalho.
+  # PIB 2,2% em 2025, 1,8% projetado 2026. Desemprego 5,9%-6,1%. 78,1%
+  # satisfeitos com o trabalho. Bônus demográfico em fase final.
+  # =========================================================================
+  - url: https://www.moneytimes.com.br/quao-satisfeitos-estao-os-trabalhadores-brasileiros-em-2026-veja-o-que-diz-o-mais-novo-estudo-fgv-ibre-mlem/
+    title: "Money Times — Satisfação dos trabalhadores brasileiros 2026 (FGV IBRE / Tobler)"
+    type: article
+    date: 2026-02-15
+    first_person: false
+  - url: https://portal.fgv.br/artigo/surpresas-e-os-alertas-que-vem-do-front-demografico-no-brasil
+    title: "Portal FGV — Surpresas e alertas do front demográfico no Brasil"
+    type: article
+    date: 2025-11-10
+    first_person: false
+  - url: https://ibre.fgv.br/sites/ibre.fgv.br/files/arquivos/u65/09ce2025_bruno_ottoni.pdf
+    title: "FGV IBRE — Envelhecimento populacional: oportunidades e desafios (Bruno Ottoni)"
+    type: article
+    date: 2025-09-15
+    first_person: false
+  - url: https://blogdoibre.fgv.br/posts/mercado-de-trabalho-situacao-atual-e-desafios-para-2026
+    title: "Blog IBRE — Mercado de trabalho: situação e desafios 2026"
+    type: article
+    date: 2026-01-20
+    first_person: false
+
+  # =========================================================================
+  # IBGE — PNAD Contínua 2025 (divulgação abr/2026) + Censo 2022.
+  # Brasil 212,7M habitantes; crescimento 0,39% a.a.; mulheres 51,2%.
+  # 60+ anos: 11,3% (2012) → 16,6% (2025). Brancos 46,4% → 42,6%; pretos
+  # 7,4% → 10,4%. Pessoas morando sozinhas 12,2% → 19,7%.
+  # =========================================================================
+  - url: https://agenciabrasil.ebc.com.br/geral/noticia/2026-04/populacao-no-brasil-cresce-em-ritmo-menor-e-esta-envelhecendo
+    title: "Agência Brasil — População cresce em ritmo menor e envelhece (PNAD 2025)"
+    type: release
+    date: 2026-04-17
+    first_person: false
+  - url: https://www.correiobraziliense.com.br/brasil/2026/04/7400327-brasil-atinge-2127-milhoes-de-habitantes-em-2025-aponta-ibge.html
+    title: "Correio Braziliense — Brasil atinge 212,7M habitantes em 2025"
+    type: article
+    date: 2026-04-17
+    first_person: false
+  - url: https://www.correiobraziliense.com.br/brasil/2026/04/7401114-populacao-brasileira-envelhece-e-demanda-maiores-cuidados.html
+    title: "Correio Braziliense — População envelhece e demanda maiores cuidados"
+    type: article
+    date: 2026-04-18
+    first_person: false
+  - url: https://agenciadenoticias.ibge.gov.br/agencia-noticias/2012-agencia-de-noticias/noticias/43593-censo-2022-catolicos-seguem-em-queda-evangelicos-e-sem-religiao-crescem-no-pais
+    title: "Agência IBGE — Censo 2022: católicos em queda, evangélicos e sem religião crescem"
+    type: release
+    date: 2025-06-06
+    first_person: false
+
+  # =========================================================================
+  # Demografia acadêmica — José Eustáquio Diniz Alves (Cedeplar/UFMG +
+  # Nepo/Unicamp). Bônus demográficos, transição religiosa, projeção
+  # 2100: 163M habitantes (queda em relação aos 211M de hoje).
+  # =========================================================================
+  - url: https://ihu.unisinos.br/categorias/657962-os-quatro-bonus-demograficos-e-a-nova-dinamica-populacional-global-artigo-de-jose-eustaquio-diniz-alves
+    title: "IHU Unisinos — Os quatro bônus demográficos (Diniz Alves)"
+    type: article
+    date: 2025-10-08
+    first_person: false
+  - url: https://www.ihu.unisinos.br/662887-o-declinio-do-catolicismo-na-america-latina-e-a-transicao-religiosa-no-brasil-artigo-de-jose-eustaquio-diniz-alves
+    title: "IHU Unisinos — Declínio do catolicismo e transição religiosa (Diniz Alves)"
+    type: article
+    date: 2026-03-12
+    first_person: false
+  - url: https://www.youtube.com/watch?v=f9SphggWhPE
+    title: "Diniz Alves — Brasil terá 163M de habitantes em 2100 (entrevista)"
+    type: interview
+    date: 2025-09-20
+    first_person: false
+
+  # =========================================================================
+  # Locomotiva — Renato Meirelles — classe C, classes populares, consumo.
+  # [fora-da-janela ago/2025 — mantido por relevância única sobre classe C]
+  # Quote: "Classe C tem crise de perspectiva, mas será decisiva em 2026".
+  # =========================================================================
+  - url: https://istoe.com.br/classe-c-tem-crise-de-perspectiva-mas-sera-decisiva-em-2026-diz-renato-meirelles
+    title: "IstoÉ — Classe C tem crise de perspectiva mas será decisiva em 2026 (Meirelles)"
+    type: interview
+    date: 2025-08-20
+    first_person: false
+  - url: https://platobr.com.br/classe-c-tem-crise-de-perspectiva-mas-sera-decisiva-em-2026-diz-renato-meirelles
+    title: "PlatôBR — Classe C decisiva em 2026 (Meirelles, Locomotiva)"
+    type: interview
+    date: 2025-08-20
+    first_person: false
+
+  # =========================================================================
+  # Religião — análise complementar — Christina Vital (sociologia da
+  # religião) sobre o Censo 2022. [fora-da-janela jul/2025 — mantida pela
+  # densidade etnográfica sobre evangélicos brasileiros]
+  # =========================================================================
+  - url: https://apublica.org/podcast/2025/07/podcast-pauta-publica/o-que-o-censo-nao-revela-sobre-os-evangelicos-no-brasil/
+    title: "Pauta Pública/Apública — Christina Vital sobre evangélicos no Censo 2022"
+    type: interview
+    date: 2025-07-15
+    first_person: false
+  - url: https://apublica.org/2025/07/o-que-o-censo-nao-diz-sobre-os-evangelicos-brasileiros/
+    title: "Apública — O que os números do Censo não revelam sobre evangélicos"
+    type: article
+    date: 2025-07-15
+    first_person: false

@@ -1,0 +1,12 @@
+# Dispatch 056 — full mode arch-mkt-fronteira-foresight (blast batch após @fernanda re-fix YTDLP_PROXY).
+#
+# Parte da fila de 13 dispatches sequenciais. Disparados em commits/pushes
+# separados na mesma branch — workflow usa git diff pra detectar o
+# dispatch file de cada push (sem colisão lex-newest). Enfileiram no
+# runner único (twins-febrain-twins-runner) e processam em sequência.
+
+slug: arch-mkt-fronteira-foresight
+
+mode: full
+confirm_full_mode: true
+skip_transcribe: false

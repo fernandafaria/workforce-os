@@ -1,0 +1,28 @@
+# Re-dispatch v2 dos 15 arquétipos profissionais marketing.
+#
+# Fix do dispatch 036: substituí `type: paper` por `type: article` em
+# todos os 15 YAMLs (50 ocorrências). `paper` não está na enum válida
+# do schema [article, book, crawl, interview, linkedin, podcast,
+# release, talk, video]. Validator parou no primeiro mas todos
+# precisavam fix.
+
+slugs:
+  - arch-mkt-evidencia-cpg-global
+  - arch-mkt-evidencia-varejo
+  - arch-mkt-evidencia-consultor
+  - arch-mkt-performance-trade
+  - arch-mkt-performance-digital
+  - arch-mkt-performance-rgm
+  - arch-mkt-cultura-brand-agency
+  - arch-mkt-cultura-cmo-legado
+  - arch-mkt-cultura-antropologo
+  - arch-mkt-orquestrador-insights
+  - arch-mkt-orquestrador-consultor
+  - arch-mkt-guardiao-brand-safety
+  - arch-mkt-guardiao-privacy
+  - arch-mkt-fronteira-foresight
+  - arch-mkt-fronteira-ai-martech
+
+mode: dry-run
+skip_transcribe: false
+skip_build_eval: false

@@ -1,0 +1,31 @@
+# Discovery interview spec — agent-vs-agent role-play.
+#
+# Triggers .github/workflows/twins-interview.yml on push.
+# Runner resolves slug → twin_id via interview_archetype.resolve_twin_id,
+# runs N alternating turns (interviewer Teresa-Torres-style ↔ archetype
+# RAG over corpus), posts transcript + diagnostic as PR comment.
+#
+# Schema atualizado pós-PR #270:
+#   research_goal: o que a pesquisa quer aprender (interviewer system prompt)
+#   opener: optional first question; se omitido, interviewer escolhe
+#   (legacy `topic:` ainda aceito pelo parser pra back-compat)
+#
+# Esta corrida (v006) tem dois objetivos:
+#   1. Validar a integração nova: workflow ↔ CLI ↔ parser todos alinhados
+#      ao schema research_goal/opener pós-merge dos 3 PRs paralelos
+#   2. Coletar diagnóstico SQL do `Inspect twins.db state` step pra
+#      planejar A+B+C (substituir 3 YT failed, adicionar mais sources,
+#      podar fontes ruidosas) e fechar o gate p70 ≥ 0.72
+
+slug: arch-c-mae-se-urbano
+research_goal: |
+  Entender como uma mãe de classe C urbana do Sudeste decide o que
+  pagar, atrasar e pedir emprestado quando o dinheiro fica curto no
+  fim do mês — buscando episódio concreto recente e a lógica vivida
+  por trás da decisão (não regra abstrata).
+opener: |
+  Conta da última vez que você teve que escolher entre pagar uma conta
+  e comprar a feira. Como foi?
+turns: 8
+session_id: 2026-04-28-mae-c-rotina-financeira-006
+model: claude-opus-4-7
