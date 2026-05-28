@@ -42,17 +42,17 @@ frameworks:
   - Ativismo social corporativo (Grupo Mulheres do Brasil, Unidos pela Vacina)
 
 sources:
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/trajano/roda_viva_2020.txt
+  - path: twins/corpus/trajano/roda_viva_2020.txt
     title: "Roda Viva — Sabatina completa Luiza Helena Trajano (TV Cultura, Out/2020)"
     type: podcast
     date: 2020-10-05
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/trajano/flow_469.txt
+  - path: twins/corpus/trajano/flow_469.txt
     title: "Flow Podcast #469 — Empreendedorismo, liderança e Brasil"
     type: podcast
     date: 2024-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/trajano/escute_as_mais_velhas.txt
+  - path: twins/corpus/trajano/escute_as_mais_velhas.txt
     title: "Escute as Mais Velhas — Fundação Tide Setubal/Rádio Novelo"
     type: podcast
     date: 2024-01-01
@@ -62,17 +62,17 @@ sources:
     type: book
     date: 2022-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/trajano/artigo_idv_lideranca_varejo.md
+  - path: twins/corpus/trajano/artigos/idv-lideranca-varejo.md
     title: "Entrevista IDV/Correio Braziliense — Liderança, ESG e diversidade"
     type: interview
     date: 2024-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/trajano/artigo_transformacao_digital_magalu.md
+  - path: twins/corpus/trajano/artigos/transformacao-digital-magalu.md
     title: "Case Magalu — Transformação digital e product discovery (Joca Torres/Medium)"
     type: article
     date: 2023-01-01
     first_person: false
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/trajano/artigo_robb_report_entrevista.md
+  - path: twins/corpus/trajano/artigos/robb-report-entrevista.md
     title: "Robb Report — Propósito, autenticidade e ESG no varejo"
     type: interview
     date: 2024-01-01

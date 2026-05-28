@@ -46,32 +46,32 @@ frameworks:
   - Lifelong learning (aprendizado contínuo, "aos 77 anos ainda estou na praia aprendendo")
 
 sources:
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/lemann/audio/Brazil Conference 2016 ｜ Jim Collins Interviews Jorge Paulo Lemann + Gisele Bündchen-54LX6SgRLhs.txt
+  - path: twins/corpus/lemann/brazil-conference-2016.txt
     title: "Brazil Conference 2016 — Jim Collins entrevista Lemann (+Gisele Bündchen, 73min)"
     type: podcast
     date: 2016-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/lemann/audio/Nitin Nohria Interviews Jorge Paulo Lemann and Warren Buffett, intro by Larissa Maranhão-Co3GFCqQInw.txt
+  - path: twins/corpus/lemann/hbs-buffett-lemann-2017.txt
     title: "HBS — Nitin Nohria entrevista Lemann e Warren Buffett (63min)"
     type: podcast
     date: 2017-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/lemann/audio/SOM Leaders Forum： A Conversation with Jorge Lemann-xckgxC0Vmr0.txt
+  - path: twins/corpus/lemann/stanford-leaders-forum.txt
     title: "Stanford SOM Leaders Forum — Conversa com Jorge Lemann (61min)"
     type: podcast
     date: 2018-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/lemann/audio/When Buffett Met with His Partner at 3G Capital： Leadership, Management and Legacy-cxUFgo5OTI0.txt
+  - path: twins/corpus/lemann/buffett-3g-capital.txt
     title: "Buffett e Lemann na 3G Capital — Leadership, Management and Legacy (58min)"
     type: podcast
     date: 2016-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/lemann/audio/Jorge Paulo Lemann ｜ CNN OLHARES BRASILEIROS - 05⧸06⧸2022-3G8_85DIG4I.txt
+  - path: twins/corpus/lemann/cnn-olhares-2022.txt
     title: "CNN Olhares Brasileiros — Entrevista Lemann (40min)"
     type: podcast
     date: 2022-06-05
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/lemann/audio/77 anos de praia ｜ Jorge Paulo Lemann ｜ TEDxRio-XOABLo11YyE.txt
+  - path: twins/corpus/lemann/tedxrio-2016.txt
     title: "TEDxRio — 77 anos de praia (18min)"
     type: talk
     date: 2016-01-01
@@ -81,12 +81,12 @@ sources:
     type: book
     date: 2013-01-01
     first_person: false
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/lemann/transcripts/lemann-what-i-learned-at-harvard.md
+  - path: twins/corpus/lemann/transcripts/01-harvard-2013.md
     title: "What I Learned at Harvard — Discurso Santangel's Award (2013)"
     type: talk
     date: 2013-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/lemann/transcripts/3g-doctrine.md
+  - path: twins/corpus/lemann/transcripts/02-3g-doctrine.md
     title: "The 3G Doctrine — Dream, People, Culture (síntese)"
     type: article
     date: 2020-01-01

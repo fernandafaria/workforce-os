@@ -159,12 +159,12 @@ sources:
     type: interview
     date: 2026-05-27
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/_r_roda_viva.txt
+  - path: twins/corpus/renato-meirelles/roda-viva-2024.txt
     title: "Roda Viva — Sabatina completa Renato Meirelles (TV Cultura, Out/2024 — Whisper turbo)"
     type: podcast
     date: 2024-10-07
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/_r_poder_entrevista.txt
+  - path: twins/corpus/renato-meirelles/poder-entrevista-2024.txt
     title: "Poder Entrevista — Renato Meirelles (Poder360, Jan/2024 — Whisper turbo)"
     type: podcast
     date: 2024-01-10

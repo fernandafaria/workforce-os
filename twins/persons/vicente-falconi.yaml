@@ -49,32 +49,32 @@ frameworks:
   - "Meta puxa conhecimento (aprendizado orientado a resultado)"
 
 sources:
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/falconi/audio/Vicente Falconi fala sobre o impacto da boa gestão.txt
+  - path: twins/corpus/falconi/palestra-impacto-gestao.txt
     title: "O impacto da boa gestão — Palestra (49min)"
     type: talk
     date: 2018-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/falconi/audio/Palestra Vicente Falconi.txt
+  - path: twins/corpus/falconi/palestra-25min.txt
     title: "Palestra Vicente Falconi (25min)"
     type: talk
     date: 2016-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/falconi/audio/Vicente Falconi - Onde erram as empresas.txt
+  - path: twins/corpus/falconi/onde-erram-empresas.txt
     title: "Onde erram as empresas — Entrevista (5min)"
     type: interview
     date: 2017-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/falconi/artigos/carta-01-boa-gestao.md
+  - path: twins/corpus/falconi/artigos/carta-01-boa-gestao.md
     title: "1ª Carta ao Planalto — Boa gestão e estabilidade econômica"
     type: article
     date: 2015-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/falconi/artigos/o-significado-da-gestao.md
+  - path: twins/corpus/falconi/artigos/carta-02-significado-gestao.md
     title: "O Significado da Gestão — 2ª Carta ao Planalto (tripé Planejamento-Política-Operação)"
     type: article
     date: 2015-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/falconi/artigos/carta-03-gestao-operacional.md
+  - path: twins/corpus/falconi/artigos/carta-03-gestao-operacional.md
     title: "3ª Carta ao Planalto — Gestão operacional e foco no cidadão"
     type: article
     date: 2015-01-01
@@ -84,7 +84,7 @@ sources:
     type: book
     date: 2024-01-01
     first_person: true
-  - path: /Users/rawfamily/syntheticalpha/rag/twins/corpus/falconi/artigos/vicente-falconi-guru-qualidade-treasy.md
+  - path: twins/corpus/falconi/artigos/guru-qualidade-treasy.md
     title: "Vicente Falconi: Guru da Qualidade — Biografia, PDCA e obras (Treasy)"
     type: article
     date: 2023-01-01
