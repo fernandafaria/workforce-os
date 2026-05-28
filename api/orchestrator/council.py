@@ -9,7 +9,9 @@ LangGraph flow:
 from typing import Optional, List, Dict, Any
 import logging
 import asyncio
+import json
 
+from ._base import llm_call
 from ..router.central import CentralRouter
 from ..agents.catalog import AgentCatalog
 from ..config import get_settings
@@ -115,7 +117,7 @@ class CouncilOrchestrator:
             persona = agent.get("prompt") or await self.catalog.get_prompt(slug)
 
             try:
-                response = await self._llm_call(persona, prompt_text)
+                response = await llm_call(persona, prompt_text)
                 return {
                     "agent": slug,
                     "name": name,
@@ -133,35 +135,6 @@ class CouncilOrchestrator:
 
         tasks = [call_one(a) for a in agents]
         return await asyncio.gather(*tasks)
-
-    async def _llm_call(self, system_prompt: str, user_message: str) -> str:
-        """Call DeepSeek V4 Pro for agent response."""
-        if not self.settings.deepseek_api_key:
-            return "[LLM não configurado — resposta stub]"
-
-        import httpx
-        try:
-            async with httpx.AsyncClient(timeout=self.settings.request_timeout_seconds) as client:
-                resp = await client.post(
-                    "https://api.deepseek.com/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {self.settings.deepseek_api_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": "deepseek-chat",
-                        "messages": [
-                            {"role": "system", "content": (system_prompt or "")[:3000]},
-                            {"role": "user", "content": user_message[:6000]},
-                        ],
-                        "temperature": 0.7,
-                        "max_tokens": 1000,
-                    },
-                )
-                resp.raise_for_status()
-                return resp.json()["choices"][0]["message"]["content"]
-        except Exception as e:
-            return f"[Erro LLM: {e}]"
 
     def _synthesize(
         self,
@@ -211,6 +184,3 @@ class CouncilOrchestrator:
         except Exception as e:
             log.warning(f"Memory persist failed (non-fatal): {e}")
 
-
-# For backwards compat
-import json
