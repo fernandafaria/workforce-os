@@ -109,10 +109,12 @@ export function HomePage() {
           <span style={{ width: 36, height: 36, borderRadius: 12, background: 'var(--canvas)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent)' }}>
             👥
           </span>
+          <Link to="/catalogo" style={{ textDecoration: 'none', color: 'inherit', flex: 1 }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--label)' }}>Meu time</div>
             <div style={{ fontSize: 12, color: 'var(--label-2)' }}>{personaCount} especialistas disponíveis</div>
           </div>
+          </Link>
         </button>
       </div>
 

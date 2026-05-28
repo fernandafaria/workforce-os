@@ -5,6 +5,7 @@ import { HomePage } from './screens/Home';
 import { AgentCreatePage } from './screens/AgentCreate';
 import ConselhoPage from './screens/Conselho';
 import GrupoPage from './screens/Grupo';
+import AgentCatalogPage from './screens/AgentCatalog';
 import './tokens.css';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/criar" element={<AgentCreatePage />} />
         <Route path="/conselho" element={<ConselhoPage />} />
         <Route path="/grupo" element={<GrupoPage />} />
+        <Route path="/catalogo" element={<AgentCatalogPage />} />
       </Routes>
     </BrowserRouter>
   );
