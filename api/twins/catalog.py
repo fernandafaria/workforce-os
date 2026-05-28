@@ -23,6 +23,43 @@ log = logging.getLogger(__name__)
 PUBLISHED_STATUS = "published"
 PUBLIC_AUTHORIZATIONS = ("public_figure",)
 
+# Twins that have passed eval can be invited into a Council session.
+# `production` would require an explicit human promotion beyond eval_passed.
+CONSULTABLE_STATUSES = ("eval_passed", "production")
+
+# Model used to interview/eval/answer-as twins. Twins were synthesized by
+# Opus and reproduce voice best when answered by the same family.
+TWIN_MODEL_REF = "claude-opus-4-7"
+
+
+def build_twin_system_prompt(
+    synth: Dict[str, Any], name_public: str
+) -> str:
+    """Construct a system prompt that makes an LLM answer *as* this twin.
+
+    Used both by Council (when a twin participates) and by the eval/interview
+    edge functions. Single source of truth for what 'speaking as' a twin
+    means in this codebase.
+    """
+    voice = synth.get("voice", {}) or {}
+    return (
+        f"Você responde *como* {name_public}. Voz, padrões de decisão e "
+        f"vieses devem refletir essa pessoa específica, não uma média. "
+        f"Não invente fatos sobre quem você não é.\n\n"
+        f"IDENTITY:\n{synth.get('identity', '')}\n\n"
+        f"VOICE:\n- tone: {voice.get('tone', '')}\n"
+        f"- register: {voice.get('register', '')}\n"
+        f"- language: {voice.get('language', '')}\n"
+        f"- quirks: {voice.get('language_quirks', [])}\n\n"
+        f"DECISION PATTERNS:\n{synth.get('decision_patterns', [])}\n\n"
+        f"BIASES:\n{synth.get('biases', [])}\n\n"
+        f"SIGNATURE PHRASES (use naturalmente, sem forçar):\n"
+        f"{synth.get('signature_phrases', [])}\n\n"
+        f"DO:\n{synth.get('do', [])}\n\n"
+        f"DONT:\n{synth.get('dont', [])}\n\n"
+        f"Responda em 2-4 parágrafos. Sem lista numerada burocrática."
+    )
+
 
 class TwinCatalog:
     """Catalog of cognitive twins of real people."""
@@ -215,6 +252,73 @@ class TwinCatalog:
         except Exception as e:
             log.warning(f"Twin status failed for {twin_id}: {e}")
             return {"error": str(e)}
+
+
+    async def load_for_council(
+        self, twin_ids: List[str], *, allow_drafts: bool = False
+    ) -> List[Dict[str, Any]]:
+        """Load twins ready to participate in a Council session.
+
+        By default only returns twins in ``eval_passed`` or ``production``
+        status whose ``schema_json.synthesized`` block exists. Each entry
+        is shaped like an agent participant so the orchestrator can mix
+        them with persona agents in a single Send[]-style fan-out.
+
+        Returns rows with: ``twin_id, slug, name, system_prompt, model_ref,
+        kind='twin'``. Missing/unfit twin_ids are silently dropped — the
+        caller (Council) decides whether to surface that to the user.
+        """
+        if not twin_ids:
+            return []
+        try:
+            q = (
+                self.client.table("twin")
+                .select("id, person_id, status, schema_json, archetype_label")
+                .in_("id", twin_ids)
+            )
+            if not allow_drafts:
+                q = q.in_("status", list(CONSULTABLE_STATUSES))
+            twin_rows = (q.execute().data) or []
+            if not twin_rows:
+                return []
+
+            person_ids = list({t["person_id"] for t in twin_rows if t.get("person_id")})
+            persons: Dict[str, Dict[str, Any]] = {}
+            if person_ids:
+                pr = (
+                    self.client.table("twin_person")
+                    .select("id, name_public, authorization")
+                    .in_("id", person_ids)
+                    .execute()
+                )
+                persons = {p["id"]: p for p in (pr.data or [])}
+
+            out: List[Dict[str, Any]] = []
+            for t in twin_rows:
+                schema = t.get("schema_json") or {}
+                synth = schema.get("synthesized") or {}
+                if not synth:
+                    log.info(f"twin {t['id']} skipped: not synthesized")
+                    continue
+                person = persons.get(t.get("person_id"), {}) or {}
+                name_public = person.get("name_public") or t.get("archetype_label") or "Unknown"
+
+                out.append(
+                    {
+                        "twin_id": t["id"],
+                        "slug": t["id"],  # used as primary key in framed_prompts/responses
+                        "name": name_public,
+                        "system_prompt": build_twin_system_prompt(synth, name_public),
+                        "model_ref": TWIN_MODEL_REF,
+                        "kind": "twin",
+                        "source": f"Cognitive twin: {name_public}",
+                        "status": t.get("status"),
+                    }
+                )
+            return out
+        except Exception as e:
+            log.warning(f"Twin load_for_council failed: {e}")
+            return []
 
 
 def _last_eval_passed(eval_scores: Optional[Dict[str, Any]]) -> Optional[bool]:
