@@ -1,0 +1,459 @@
+"""
+Workforce OS — LangGraph Orchestrator
+Stateful agent orchestration for Council, Group, and Ping.
+
+Architecture:
+  Council: router → framing → Send[] agents (parallel) → aggregate → format
+  Group:   init → loop[Send[] rounds] → consensus → synthesize
+  Ping:    fetch vertical KB → generate briefing → format
+"""
+
+from typing import List, Dict, Any, Optional, TypedDict, Annotated
+import operator
+import logging
+import asyncio
+
+from langgraph.graph import StateGraph, END
+from langgraph.graph.state import CompiledStateGraph
+from langgraph.checkpoint.memory import MemorySaver
+
+from ..agents.catalog import AgentCatalog
+from ..config import get_settings
+
+log = logging.getLogger(__name__)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# State Schemas
+# ═══════════════════════════════════════════════════════════════════════════
+
+class CouncilState(TypedDict):
+    question: str
+    context: Optional[str]
+    agents: List[Dict[str, Any]]
+    framed_prompts: List[Dict[str, str]]
+    responses: Annotated[List[Dict[str, Any]], operator.add]
+    synthesis: str
+    error: Optional[str]
+
+
+class GroupState(TypedDict):
+    topic: str
+    participants: List[Dict[str, Any]]
+    max_rounds: int
+    round: int
+    discussion: Annotated[List[Dict[str, Any]], operator.add]
+    consensus_detected: bool
+    consensus: str
+    divergences: List[Dict[str, str]]
+    turns: List[Dict[str, Any]]
+    error: Optional[str]
+
+
+class PingState(TypedDict):
+    sector: Optional[str]
+    user_id: Optional[str]
+    market: List[str]
+    sector_news: List[str]
+    alerts: List[str]
+    briefing: str
+    error: Optional[str]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# LLM Call Helper
+# ═══════════════════════════════════════════════════════════════════════════
+
+async def _call_llm(system_prompt: str, user_message: str, model: str = None) -> str:
+    """Call LLM with system + user prompt. Uses DeepSeek by default."""
+    import os
+    
+    settings = get_settings()
+    model = model or settings.primary_model
+    api_key = settings.deepseek_api_key
+    
+    if not api_key and "deepseek" in model:
+        api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+    if not api_key:
+        api_key = settings.anthropic_api_key
+        model = settings.secondary_model
+    
+    if not api_key:
+        return "[API key not configured]"
+    
+    try:
+        import httpx
+        async with httpx.AsyncClient(timeout=60) as client:
+            if "deepseek" in model:
+                resp = await client.post(
+                    "https://api.deepseek.com/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    json={
+                        "model": "deepseek-chat",
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_message},
+                        ],
+                        "temperature": 0.7,
+                    },
+                )
+            else:  # anthropic
+                resp = await client.post(
+                    "https://api.anthropic.com/v1/messages",
+                    headers={
+                        "x-api-key": api_key,
+                        "anthropic-version": "2023-06-01",
+                    },
+                    json={
+                        "model": "claude-sonnet-4-20250514",
+                        "max_tokens": 1024,
+                        "system": system_prompt,
+                        "messages": [{"role": "user", "content": user_message}],
+                    },
+                )
+            
+            data = resp.json()
+            if "deepseek" in model:
+                return data["choices"][0]["message"]["content"]
+            else:
+                return data["content"][0]["text"]
+    except Exception as e:
+        log.error(f"LLM call failed: {e}")
+        return f"[Erro ao consultar agente: {e}]"
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Council Orchestrator (Conselho 1:1)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class CouncilOrchestrator:
+    """Orchestrates a 1:1 council session with parallel agent execution."""
+    
+    def __init__(self):
+        self.catalog = AgentCatalog()
+        self.graph = self._build_graph()
+    
+    def _build_graph(self) -> CompiledStateGraph:
+        builder = StateGraph(CouncilState)
+        
+        async def framing(state: CouncilState) -> dict:
+            """Prepare prompts for each selected agent."""
+            framed = []
+            question = state["question"]
+            context = state.get("context", "")
+            
+            for agent in state["agents"]:
+                prompt = agent.get("prompt", "")
+                if not prompt:
+                    prompt = await self.catalog.get_prompt(agent["slug"]) or ""
+                
+                user_msg = f"""PERGUNTA DO EXECUTIVO:
+
+"{question}"
+
+CONTEXTO ADICIONAL:
+{context or 'Nenhum contexto adicional.'}
+
+INSTRUÇÃO: Dê sua recomendação em 2-3 parágrafos, considerando sua especialidade. 
+Seja direto, acionável e honesto. Se houver riscos, mencione-os explicitamente."""
+                
+                framed.append({
+                    "agent": agent["slug"],
+                    "name": agent.get("name", agent["slug"]),
+                    "system_prompt": prompt,
+                    "user_message": user_msg,
+                })
+            
+            return {"framed_prompts": framed}
+        
+        async def execute_agents(state: CouncilState) -> dict:
+            """Execute all agents in parallel (Send pattern)."""
+            prompts = state.get("framed_prompts", [])
+            
+            async def call_one(p):
+                content = await _call_llm(p["system_prompt"], p["user_message"])
+                return {
+                    "agent": p["agent"],
+                    "name": p["name"],
+                    "content": content,
+                }
+            
+            results = await asyncio.gather(*[call_one(p) for p in prompts])
+            return {"responses": results}
+        
+        async def synthesize(state: CouncilState) -> dict:
+            """Generate executive summary."""
+            responses = state.get("responses", [])
+            if not responses:
+                return {"synthesis": "Não foi possível gerar recomendações."}
+            
+            summary_prompt = "Você é um sintetizador executivo. Dado as perspectivas abaixo, gere um sumário de 2-3 frases que capture a recomendação principal."
+            perspectives_text = "\n\n".join(
+                f"[{r['name']}]: {r['content'][:500]}" for r in responses
+            )
+            
+            synthesis = await _call_llm(summary_prompt, perspectives_text)
+            return {"synthesis": synthesis}
+        
+        builder.add_node("framing", framing)
+        builder.add_node("execute", execute_agents)
+        builder.add_node("synthesize", synthesize)
+        
+        builder.set_entry_point("framing")
+        builder.add_edge("framing", "execute")
+        builder.add_edge("execute", "synthesize")
+        builder.add_edge("synthesize", END)
+        
+        return builder.compile(checkpointer=MemorySaver())
+    
+    async def execute(
+        self,
+        question: str,
+        context: Optional[str] = None,
+        agent_slugs: List[str] = None,
+    ) -> Dict[str, Any]:
+        """Run a council session."""
+        from ..router.central import CentralRouter
+        
+        # 1. Route to agents
+        router = CentralRouter()
+        agents = await router.route(question, agent_slugs)
+        
+        # 2. Run LangGraph
+        initial_state: CouncilState = {
+            "question": question,
+            "context": context,
+            "agents": agents,
+            "framed_prompts": [],
+            "responses": [],
+            "synthesis": "",
+            "error": None,
+        }
+        
+        result = await self.graph.ainvoke(initial_state)
+        
+        return {
+            "question": question,
+            "agents": agents,
+            "responses": result.get("responses", []),
+            "synthesis": result.get("synthesis", ""),
+        }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Group Orchestrator (Debate Multi-Agente)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class GroupOrchestrator:
+    """Orchestrates multi-agent group debate with rounds."""
+    
+    def __init__(self):
+        self.catalog = AgentCatalog()
+        self.graph = self._build_graph()
+    
+    def _build_graph(self) -> CompiledStateGraph:
+        builder = StateGraph(GroupState)
+        
+        async def init_round(state: GroupState) -> dict:
+            """Initialize or advance debate round."""
+            current_round = state.get("round", 0) + 1
+            
+            # Check consensus from previous round
+            if current_round > 1:
+                discussion = state.get("discussion", [])
+                recent = [d for d in discussion if d.get("round") == current_round - 1]
+                agree_count = sum(1 for d in recent if "concordo" in d.get("content", "").lower())
+                if agree_count >= len(recent) * 0.6:
+                    return {"round": current_round, "consensus_detected": True}
+            
+            return {"round": current_round, "consensus_detected": False}
+        
+        async def debate_round(state: GroupState) -> dict:
+            """Execute one round of parallel debate."""
+            topic = state["topic"]
+            participants = state.get("participants", [])
+            round_num = state.get("round", 1)
+            discussion = state.get("discussion", [])
+            is_first = round_num == 1
+            
+            # Build debate context
+            context = ""
+            if not is_first:
+                recent = [d for d in discussion if d.get("round") == round_num - 1]
+                context = "\n".join(
+                    f"[{d['name']}]: {d['content'][:300]}" for d in recent
+                )
+            
+            async def call_participant(p):
+                prompt = p.get("prompt", "")
+                if not prompt:
+                    prompt = await self.catalog.get_prompt(p["slug"]) or ""
+                
+                if is_first:
+                    msg = f'TÓPICO EM DEBATE: "{topic}"\n\nDê sua opinião inicial. 2 parágrafos.'
+                else:
+                    msg = f'TÓPICO: "{topic}"\n\nRODADA ANTERIOR:\n{context}\n\nResponda ao que foi dito. Se concordar com alguém, diga "concordo com [nome]". Se discordar, diga "discordo de [nome]".'
+                
+                content = await _call_llm(prompt, msg)
+                return {
+                    "agent": p["slug"],
+                    "name": p.get("name", p["slug"]),
+                    "round": round_num,
+                    "content": content,
+                }
+            
+            results = await asyncio.gather(*[call_participant(p) for p in participants])
+            
+            return {
+                "discussion": results,
+                "turns": results,
+            }
+        
+        async def synthesize_group(state: GroupState) -> dict:
+            """Synthesize group consensus."""
+            discussion = state.get("discussion", [])
+            
+            all_content = "\n\n".join(
+                f"[{d['name']} (Round {d.get('round', '?')})]: {d['content'][:400]}"
+                for d in discussion
+            )
+            
+            consensus = await _call_llm(
+                "Sintetize o consenso deste debate em 2-3 frases. Destaque pontos de acordo e divergências.",
+                all_content,
+            )
+            
+            return {"consensus": consensus}
+        
+        builder.add_node("init", init_round)
+        builder.add_node("debate", debate_round)
+        builder.add_node("synthesize", synthesize_group)
+        
+        builder.set_entry_point("init")
+        
+        # Conditional edge: loop until consensus or max rounds
+        def should_continue(state: GroupState) -> str:
+            if state.get("consensus_detected"):
+                return "synthesize"
+            if state.get("round", 0) >= state.get("max_rounds", 5):
+                return "synthesize"
+            return "debate"
+        
+        builder.add_conditional_edges("init", should_continue, {
+            "debate": "debate",
+            "synthesize": "synthesize",
+        })
+        builder.add_conditional_edges("debate", should_continue, {
+            "debate": "debate",
+            "synthesize": "synthesize",
+        })
+        builder.add_edge("synthesize", END)
+        
+        return builder.compile(checkpointer=MemorySaver())
+    
+    async def execute(
+        self,
+        topic: str,
+        participant_slugs: List[str] = None,
+        max_rounds: int = 5,
+    ) -> Dict[str, Any]:
+        """Run a group debate."""
+        from ..router.central import CentralRouter
+        
+        # Default participants if none specified
+        if not participant_slugs:
+            participant_slugs = ["simon-willison", "roger-martin", "elena-verna", 
+                                 "andrej-karpathy", "claire-hughes-johnson"]
+        
+        # Load participant prompts
+        catalog = AgentCatalog()
+        participants = []
+        for slug in participant_slugs:
+            prompt = await catalog.get_prompt(slug)
+            participants.append({
+                "slug": slug,
+                "name": slug.replace("-", " ").title(),
+                "prompt": prompt,
+            })
+        
+        initial_state: GroupState = {
+            "topic": topic,
+            "participants": participants,
+            "max_rounds": max_rounds,
+            "round": 0,
+            "discussion": [],
+            "consensus_detected": False,
+            "consensus": "",
+            "divergences": [],
+            "turns": [],
+            "error": None,
+        }
+        
+        result = await self.graph.ainvoke(initial_state)
+        
+        return {
+            "topic": topic,
+            "turns": result.get("turns", []),
+            "discussion": result.get("discussion", []),
+            "consensus": result.get("consensus", ""),
+            "rounds": result.get("round", 0),
+            "divergences": result.get("divergences", []),
+        }
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Ping Orchestrator (Daily Briefing)
+# ═══════════════════════════════════════════════════════════════════════════
+
+class PingOrchestrator:
+    """Generates daily executive briefings."""
+    
+    async def execute(
+        self,
+        sector: Optional[str] = None,
+        user_id: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Generate a morning briefing."""
+        sector = sector or "Geral"
+        
+        briefing_prompt = f"""Você é um analista executivo gerando um briefing matinal para o setor: {sector}.
+
+Gere 3 seções:
+1. MERCADO (3 itens): movimentos macro que afetam o setor hoje
+2. SEU SETOR (3 itens): notícias específicas do setor
+3. ALERTA (1-2 itens): riscos ou oportunidades iminentes
+
+Formato: cada item em uma linha, começando com "•". Seja conciso e acionável."""
+
+        response = await _call_llm(briefing_prompt, f"Setor: {sector}")
+        
+        # Parse response into sections
+        lines = response.split("\n")
+        market = []
+        sector_news = []
+        alerts = []
+        current = None
+        
+        for line in lines:
+            line = line.strip()
+            if "MERCADO" in line.upper():
+                current = "market"
+            elif "SETOR" in line.upper():
+                current = "sector"
+            elif "ALERTA" in line.upper():
+                current = "alert"
+            elif line.startswith("•") and current:
+                item = line.replace("•", "").strip()
+                if current == "market":
+                    market.append(item)
+                elif current == "sector":
+                    sector_news.append(item)
+                elif current == "alert":
+                    alerts.append(item)
+        
+        return {
+            "sector": sector,
+            "market": market or ["Dados de mercado indisponíveis"],
+            "sector_news": sector_news or ["Notícias do setor indisponíveis"],
+            "alerts": alerts or ["Nenhum alerta crítico hoje"],
+        }
