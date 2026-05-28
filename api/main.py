@@ -445,6 +445,75 @@ async def twin_publish(twin_id: str, user_id: str = Depends(get_user_id)):
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+# Dynamic Agents — spawn-on-demand to fill expertise gaps
+# ═══════════════════════════════════════════════════════════════════════════
+
+from .dynamic_agents.catalog import DynamicAgentsCatalog
+from .dynamic_agents.spawner import AgentSpawner
+
+_dyn_catalog = DynamicAgentsCatalog()
+_dyn_spawner = AgentSpawner()
+
+
+class SpawnRequest(BaseModel):
+    question: str
+    expertise_gap: str
+    context: Optional[str] = None
+    parent_team_slug: Optional[str] = None
+    parent_persona_slugs: Optional[List[str]] = None
+    ttl_hours: Optional[int] = None
+    max_uses: Optional[int] = None
+
+
+@app.post("/agents/dynamic/spawn")
+async def dynamic_agent_spawn(req: SpawnRequest, user_id: str = Depends(get_user_id)):
+    """Cria um agente temporário para fechar uma lacuna de expertise no Council."""
+    return await _dyn_spawner.spawn(
+        question=req.question,
+        expertise_gap=req.expertise_gap,
+        context=req.context,
+        user_id=user_id,
+        parent_team_slug=req.parent_team_slug,
+        parent_persona_slugs=req.parent_persona_slugs,
+        ttl_hours=req.ttl_hours,
+        max_uses=req.max_uses,
+    )
+
+
+@app.get("/agents/dynamic/active")
+async def dynamic_agent_active(
+    limit: int = 50,
+    all_users: bool = False,
+    user_id: str = Depends(get_user_id),
+):
+    """Agentes dinâmicos ativos (não expirados, não dissolvidos)."""
+    scope = None if all_users else user_id
+    rows = await _dyn_catalog.list_active(user_id=scope, limit=limit)
+    return {"agents": rows, "total": len(rows)}
+
+
+@app.get("/agents/dynamic/{agent_id}")
+async def dynamic_agent_get(agent_id: str, user_id: str = Depends(get_user_id)):
+    row = await _dyn_catalog.get(agent_id)
+    if not row:
+        raise HTTPException(404, f"dynamic agent '{agent_id}' not found")
+    return row
+
+
+@app.post("/agents/dynamic/{agent_id}/dissolve")
+async def dynamic_agent_dissolve(
+    agent_id: str, reason: str = "manual", user_id: str = Depends(get_user_id)
+):
+    return await _dyn_catalog.dissolve(agent_id, reason=reason)
+
+
+@app.post("/agents/dynamic/dissolve-expired")
+async def dynamic_agent_bulk_dissolve(user_id: str = Depends(get_user_id)):
+    """Dissolve em massa os agentes que passaram do TTL. Cron-friendly."""
+    return await _dyn_catalog.dissolve_expired()
+
+
+# ═══════════════════════════════════════════════════════════════════════════
 # Persona Lifecycle — eval, promote, deprecate, version snapshots
 # ═══════════════════════════════════════════════════════════════════════════
 
