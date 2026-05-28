@@ -40,6 +40,7 @@ class CouncilRequest(BaseModel):
     question: str
     context: Optional[str] = None
     agents: Optional[List[str]] = None
+    twins: Optional[List[str]] = None
     stream: bool = False
 
 class GroupRequest(BaseModel):
@@ -76,12 +77,19 @@ async def health():
 
 @app.post("/council")
 async def council(req: CouncilRequest, user_id: str = Depends(get_user_id)):
-    """Conselho 1:1 — CEO pergunta, sistema seleciona e orquestra especialistas."""
+    """Conselho 1:1 — CEO pergunta, sistema seleciona e orquestra especialistas.
+
+    Optional ``twins`` é a lista de twin_ids (UUIDs) de cognitive twins que
+    devem participar junto com as personas selecionadas pelo router.
+    """
     from .orchestrator import CouncilOrchestrator
     from .formatter.hierarchical import HierarchicalFormatter
 
     orch = CouncilOrchestrator()
-    result = await orch.execute(req.question, req.context, req.agents, user_id=user_id)
+    result = await orch.execute(
+        req.question, req.context, req.agents,
+        user_id=user_id, twin_ids=req.twins,
+    )
 
     formatter = HierarchicalFormatter()
     formatted = await formatter.format_council(
@@ -89,7 +97,8 @@ async def council(req: CouncilRequest, user_id: str = Depends(get_user_id)):
         result["responses"],
         result.get("synthesis", ""),
     )
-
+    # Surface twin participants in the final payload for the UI
+    formatted["twins"] = result.get("twins", [])
     return formatted
 
 
@@ -101,7 +110,10 @@ async def council_stream(req: CouncilRequest, user_id: str = Depends(get_user_id
     
     async def event_stream():
         orch = CouncilOrchestrator()
-        result = await orch.execute(req.question, req.context, req.agents, user_id=user_id)
+        result = await orch.execute(
+            req.question, req.context, req.agents,
+            user_id=user_id, twin_ids=req.twins,
+        )
 
         formatter = HierarchicalFormatter()
         formatted = await formatter.format_council(
@@ -109,6 +121,7 @@ async def council_stream(req: CouncilRequest, user_id: str = Depends(get_user_id
             result["responses"],
             result.get("synthesis", ""),
         )
+        formatted["twins"] = result.get("twins", [])
 
         yield f"data: {json.dumps(formatted)}\n\n"
 

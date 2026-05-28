@@ -31,6 +31,7 @@ class CouncilState(TypedDict):
     question: str
     context: Optional[str]
     agents: List[Dict[str, Any]]
+    twins: List[Dict[str, Any]]
     framed_prompts: List[Dict[str, str]]
     responses: Annotated[List[Dict[str, Any]], operator.add]
     synthesis: str
@@ -64,40 +65,38 @@ class PingState(TypedDict):
 # LLM Call Helper
 # ═══════════════════════════════════════════════════════════════════════════
 
-async def _call_llm(system_prompt: str, user_message: str, model: str = None) -> str:
-    """Call LLM with system + user prompt. Uses DeepSeek by default."""
-    import os
-    
+async def _call_llm(
+    system_prompt: str, user_message: str, model: Optional[str] = None
+) -> str:
+    """Call DeepSeek or Anthropic depending on the model id.
+
+    Model id can be a persona's ``model_ref`` (set in PR #6) — orchestrators
+    use ``claude-opus-4-7``, specialists use ``deepseek-chat`` — or a twin's
+    ``TWIN_MODEL_REF``. We pick the provider from the id, not from a fragile
+    fallback chain.
+    """
     settings = get_settings()
     model = model or settings.primary_model
-    api_key = settings.deepseek_api_key
-    
-    if not api_key and "deepseek" in model:
-        api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+    is_anthropic = model.startswith("claude")
+
+    api_key = settings.anthropic_api_key if is_anthropic else settings.deepseek_api_key
     if not api_key:
-        api_key = settings.anthropic_api_key
-        model = settings.secondary_model
-    
-    if not api_key:
-        return "[API key not configured]"
-    
+        # Fall back to the other provider if the preferred one isn't configured
+        if is_anthropic and settings.deepseek_api_key:
+            is_anthropic = False
+            model = "deepseek-chat"
+            api_key = settings.deepseek_api_key
+        elif (not is_anthropic) and settings.anthropic_api_key:
+            is_anthropic = True
+            model = "claude-opus-4-7"
+            api_key = settings.anthropic_api_key
+        else:
+            return "[API key not configured]"
+
     try:
         import httpx
         async with httpx.AsyncClient(timeout=60) as client:
-            if "deepseek" in model:
-                resp = await client.post(
-                    "https://api.deepseek.com/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {api_key}"},
-                    json={
-                        "model": "deepseek-chat",
-                        "messages": [
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_message},
-                        ],
-                        "temperature": 0.7,
-                    },
-                )
-            else:  # anthropic
+            if is_anthropic:
                 resp = await client.post(
                     "https://api.anthropic.com/v1/messages",
                     headers={
@@ -105,21 +104,32 @@ async def _call_llm(system_prompt: str, user_message: str, model: str = None) ->
                         "anthropic-version": "2023-06-01",
                     },
                     json={
-                        "model": "claude-sonnet-4-20250514",
+                        "model": model,
                         "max_tokens": 1024,
                         "system": system_prompt,
                         "messages": [{"role": "user", "content": user_message}],
                     },
                 )
-            
-            data = resp.json()
-            if "deepseek" in model:
-                return data["choices"][0]["message"]["content"]
-            else:
+                data = resp.json()
                 return data["content"][0]["text"]
+            else:
+                resp = await client.post(
+                    "https://api.deepseek.com/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    json={
+                        "model": model,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": user_message},
+                        ],
+                        "temperature": 0.7,
+                    },
+                )
+                data = resp.json()
+                return data["choices"][0]["message"]["content"]
     except Exception as e:
         log.error(f"LLM call failed: {e}")
-        return f"[Erro ao consultar agente: {e}]"
+        return f"[Erro ao consultar participante: {e}]"
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -137,47 +147,73 @@ class CouncilOrchestrator:
         builder = StateGraph(CouncilState)
         
         async def framing(state: CouncilState) -> dict:
-            """Prepare prompts for each selected agent."""
+            """Prepare prompts for each participant — personas + twins.
+
+            Personas use their persona_md as the system prompt; twins use
+            the cognitive schema synthesized in Stage 3. Each participant
+            carries its preferred model_ref so execute_agents can route
+            to the right provider per call.
+            """
             framed = []
             question = state["question"]
             context = state.get("context", "")
-            
-            for agent in state["agents"]:
-                prompt = agent.get("prompt", "")
+
+            user_msg = (
+                f'PERGUNTA DO EXECUTIVO:\n\n"{question}"\n\n'
+                f'CONTEXTO ADICIONAL:\n{context or "Nenhum contexto adicional."}\n\n'
+                f"INSTRUÇÃO: Dê sua recomendação em 2-3 parágrafos, considerando "
+                f"sua especialidade. Seja direto, acionável e honesto. Se houver "
+                f"riscos, mencione-os explicitamente."
+            )
+
+            # Personas
+            for agent in state.get("agents", []):
+                prompt = agent.get("prompt") or ""
                 if not prompt:
-                    prompt = await self.catalog.get_prompt(agent["slug"]) or ""
-                
-                user_msg = f"""PERGUNTA DO EXECUTIVO:
+                    prompt = (await self.catalog.get_prompt(agent["slug"])) or ""
 
-"{question}"
-
-CONTEXTO ADICIONAL:
-{context or 'Nenhum contexto adicional.'}
-
-INSTRUÇÃO: Dê sua recomendação em 2-3 parágrafos, considerando sua especialidade. 
-Seja direto, acionável e honesto. Se houver riscos, mencione-os explicitamente."""
-                
                 framed.append({
-                    "agent": agent["slug"],
+                    "participant_id": agent["slug"],
                     "name": agent.get("name", agent["slug"]),
+                    "kind": "persona",
                     "system_prompt": prompt,
                     "user_message": user_msg,
+                    "model": agent.get("model_ref"),
+                    "source": agent.get("source") or f"Persona: {agent['slug']}",
                 })
-            
+
+            # Twins — already carry their system_prompt + model_ref from
+            # TwinCatalog.load_for_council
+            for twin in state.get("twins", []):
+                framed.append({
+                    "participant_id": twin["twin_id"],
+                    "name": twin.get("name", "Twin"),
+                    "kind": "twin",
+                    "system_prompt": twin["system_prompt"],
+                    "user_message": user_msg,
+                    "model": twin.get("model_ref"),
+                    "source": twin.get("source") or f"Cognitive twin: {twin['twin_id']}",
+                })
+
             return {"framed_prompts": framed}
-        
+
         async def execute_agents(state: CouncilState) -> dict:
-            """Execute all agents in parallel (Send pattern)."""
+            """Execute all participants in parallel (Send pattern)."""
             prompts = state.get("framed_prompts", [])
-            
+
             async def call_one(p):
-                content = await _call_llm(p["system_prompt"], p["user_message"])
+                content = await _call_llm(
+                    p["system_prompt"], p["user_message"], model=p.get("model")
+                )
                 return {
-                    "agent": p["agent"],
+                    "agent": p["participant_id"],
                     "name": p["name"],
+                    "kind": p.get("kind", "persona"),
+                    "model": p.get("model"),
+                    "source": p.get("source"),
                     "content": content,
                 }
-            
+
             results = await asyncio.gather(*[call_one(p) for p in prompts])
             return {"responses": results}
         
@@ -212,19 +248,32 @@ Seja direto, acionável e honesto. Se houver riscos, mencione-os explicitamente.
         context: Optional[str] = None,
         agent_slugs: List[str] = None,
         user_id: Optional[str] = None,
+        twin_ids: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        """Run a council session.
+        """Run a council session with personas and optional cognitive twins.
 
         If user_id is provided, recent distilled memories for this executive
         are injected into the context so the council is not amnesic across
         sessions.
+
+        If twin_ids is provided, each consultable twin (status in
+        eval_passed/production) is loaded as a participant alongside the
+        routed personas. Drafts/unsynthesized twins are silently skipped.
         """
         from ..router.central import CentralRouter
         from ..memory.pipeline import MemoryPipeline
+        from ..twins.catalog import TwinCatalog
 
-        # 1. Route to agents
-        router = CentralRouter()
-        agents = await router.route(question, agent_slugs)
+        # 1. Route to agents (skip if caller passed only twins)
+        agents = []
+        if not (agent_slugs == [] and twin_ids):
+            router = CentralRouter()
+            agents = await router.route(question, agent_slugs)
+
+        # 1b. Load twin participants
+        twins: List[Dict[str, Any]] = []
+        if twin_ids:
+            twins = await TwinCatalog().load_for_council(twin_ids)
 
         # 2. Augment context with recent memories of this executive
         augmented_context = context or ""
@@ -252,6 +301,7 @@ Seja direto, acionável e honesto. Se houver riscos, mencione-os explicitamente.
             "question": question,
             "context": augmented_context,
             "agents": agents,
+            "twins": twins,
             "framed_prompts": [],
             "responses": [],
             "synthesis": "",
@@ -263,31 +313,39 @@ Seja direto, acionável e honesto. Se houver riscos, mencione-os explicitamente.
         # 4. Persist session for future memory injection (fire-and-forget)
         if user_id:
             asyncio.create_task(
-                self._persist(user_id, question, agents, result.get("responses", []),
+                self._persist(user_id, question, agents, twins,
+                              result.get("responses", []),
                               result.get("synthesis", ""))
             )
 
         return {
             "question": question,
             "agents": agents,
+            "twins": [{"twin_id": t["twin_id"], "name": t["name"]} for t in twins],
             "responses": result.get("responses", []),
             "synthesis": result.get("synthesis", ""),
         }
 
     async def _persist(self, user_id: str, question: str,
                        agents: List[Dict[str, Any]],
+                       twins: List[Dict[str, Any]],
                        responses: List[Dict[str, Any]],
                        synthesis: str) -> None:
         try:
             from ..memory.pipeline import MemoryPipeline
             pipeline = MemoryPipeline()
+            participants = (
+                [a["slug"] for a in agents] +
+                [f"twin:{t['twin_id']}" for t in twins]
+            )
             await pipeline.observe(
                 user_id=user_id,
                 session_type="council",
                 topic=question[:200],
-                agents=[a["slug"] for a in agents],
+                agents=participants,
                 raw_output={"summary": synthesis,
                             "responses": [{"agent": r["agent"],
+                                           "kind": r.get("kind", "persona"),
                                            "content": (r.get("content") or "")[:500]}
                                           for r in responses]},
             )
